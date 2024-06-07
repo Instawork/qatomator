@@ -1,0 +1,43 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "env": {
+    "mocha": true,
+    "node": true,
+    "browser": true
+  },
+  "rules": {
+    "no-undefined": [
+      "error"
+    ],
+    "no-useless-escape": "error"
+  },
+  "globals": {
+    "Promise": true,
+    "element": "readonly",
+    "browser": "readonly",
+    "expect": "readonly",
+    "chrome": "readonly"
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.{ts,tsx,jsx}"
+      ],
+      "extends": [
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "plugins": [
+        "@typescript-eslint"
+      ]
+    }
+  ]
+}
