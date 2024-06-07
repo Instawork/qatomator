@@ -1,0 +1,9 @@
+**/node_modules
+*.log
+**/reports
+.idea/
+.DS_Store
+
+**/*.log
+build
+**/allure-report*
