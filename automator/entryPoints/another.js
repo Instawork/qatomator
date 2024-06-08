@@ -55,7 +55,7 @@ async function initialiseExtensionAndEnterPrompt(driver, prompt) {
     prefs.setLevel(logging.Type.CLIENT, logging.Level.ALL)
 
     let options = new chrome.Options()
-        .addArguments('--headless=new')
+        // .addArguments('--headless=new')
         .addArguments('--disable-gpu')
         .addArguments('--no-sandbox')
         .addArguments('--disable-dev-shm-usage')

@@ -1,4 +1,5 @@
-const winston = require('winston')
+import winston from 'winston'
+
 const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
     format: winston.format.json(),
@@ -6,3 +7,5 @@ const logger = winston.createLogger({
     exceptionHandlers: [new winston.transports.File({ filename: 'exception.log' })],
     rejectionHandlers: [new winston.transports.File({ filename: 'rejections.log' })],
 })
+
+export default logger
