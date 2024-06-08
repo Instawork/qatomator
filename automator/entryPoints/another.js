@@ -1,4 +1,4 @@
-const { Builder, By, Key } = require('selenium-webdriver')
+const { logging, Builder, By, Key } = require('selenium-webdriver')
 const chrome = require('selenium-webdriver/chrome')
 const fs = require('fs')
 const { resolve } = require('path')
@@ -46,13 +46,16 @@ async function initialiseExtensionAndEnterPrompt(driver, prompt) {
 }
 
 ;(async function mainTest() {
-    const downloadDir = resolve(__dirname, '../../', 'reports/ai-explorer-downloads')
+    const downloadDir = resolve(__dirname, '../../', 'reports/downloads')
     if (!fs.existsSync(downloadDir)) {
         fs.mkdirSync(downloadDir, { recursive: true })
     }
 
+    let prefs = new logging.Preferences()
+    prefs.setLevel(logging.Type.CLIENT, logging.Level.ALL)
+
     let options = new chrome.Options()
-        // .addArguments('--headless=new')
+        .addArguments('--headless=new')
         .addArguments('--disable-gpu')
         .addArguments('--no-sandbox')
         .addArguments('--disable-dev-shm-usage')
@@ -64,6 +67,9 @@ async function initialiseExtensionAndEnterPrompt(driver, prompt) {
             'download.default_directory': downloadDir,
             'download.directory_upgrade': true,
         })
+    // .setLoggingPrefs(prefs)
+
+    options.setLoggingPrefs(prefs)
 
     let driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build()
 
@@ -76,7 +82,7 @@ async function initialiseExtensionAndEnterPrompt(driver, prompt) {
         })
 
         await driver.get('https://qa.instawork.com') // Replace with the actual home page URL
-        await driver.sleep(500000) // Give some time for extension to load. todo: Make it query & check instead
+        await driver.sleep(5000) // Give some time for extension to load. todo: Make it query & check instead
         await initialiseExtensionAndEnterPrompt(
             driver,
             'You are to login with username: Matthew2052Owensb353WebCompany@instawork.com and password test123 and book a shift for next week via "Book Instawork Pros"',
@@ -85,10 +91,10 @@ async function initialiseExtensionAndEnterPrompt(driver, prompt) {
         // Capture screenshots
         let screenshot1 = await driver.takeScreenshot()
         fs.writeFileSync('reports/starting-run.png', screenshot1, 'base64')
-        await driver.sleep(60000)
-        let screenshot2 = await driver.takeScreenshot()
-        fs.writeFileSync('reports/ending-run-soon.png', screenshot2, 'base64')
-        await driver.sleep(10000)
+        await driver.sleep(30000)
+        // let screenshot2 = await driver.takeScreenshot()
+        // fs.writeFileSync('reports/ending-run-soon.png', screenshot2, 'base64')
+        // await driver.sleep(10000)
 
         let windows = await driver.getAllWindowHandles()
         await driver.switchTo().window(windows[1])
@@ -106,8 +112,12 @@ async function initialiseExtensionAndEnterPrompt(driver, prompt) {
                 })
             })
         })
-        console.log(logs)
+        // console.log(logs)
         fs.writeFileSync('reports/extension-logs-headless.txt', logs.join('\n'), 'utf-8')
+        const performanceLogs = await driver.manage().logs().get(logging.Type.CLIENT)
+        performanceLogs.forEach((log) => {
+            console.log(log.message)
+        })
     } finally {
         await driver.quit()
     }
