@@ -5,12 +5,14 @@ import fs from 'fs'
 
 interface Config {
     openAiKey: string
+    extensionBuildDir: string
     artifactsDir: string
     downloadsDir: string
 }
 
 export const config: Config = {
     openAiKey: process.env.OPENAI_API_KEY || '',
+    extensionBuildDir: path.resolve(findRoot(__dirname), 'extension/build'),
     artifactsDir: path.resolve(findRoot(__dirname), 'artifacts'),
     downloadsDir: path.resolve(findRoot(__dirname), 'artifacts/downloads'),
 }
