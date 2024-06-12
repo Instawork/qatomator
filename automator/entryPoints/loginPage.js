@@ -3,13 +3,6 @@ const chrome = require('selenium-webdriver/chrome')
 const fs = require('fs')
 const { resolve } = require('path')
 
-async function checkSetup() {
-    if (!process.env.OPENAI_API_KEY) {
-        console.error('OPENAI_API_KEY Env Var not configured')
-        throw new Error('OPENAI_API_KEY Env Var not configured')
-    }
-}
-
 async function initialiseExtensionAndEnterPrompt(driver, prompt) {
     // Use CDP to get the list of targets (including extensions)
     let targets = await driver.sendAndGetDevToolsCommand('Target.getTargets', {})
@@ -113,7 +106,7 @@ async function initialiseExtensionAndEnterPrompt(driver, prompt) {
             })
         })
         // console.log(logs)
-        fs.writeFileSync('reports/extension-logs-headless.txt', logs.join('\n'), 'utf-8')
+        fs.writeFileSync('artifacts/extension-logs-headless.txt', logs.join('\n'), 'utf-8')
         const performanceLogs = await driver.manage().logs().get(logging.Type.CLIENT)
         performanceLogs.forEach((log) => {
             console.log(log.message)

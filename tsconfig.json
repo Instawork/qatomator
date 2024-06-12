@@ -120,6 +120,6 @@
         "skipLibCheck": true
         /* Skip type checking all .d.ts files. */
     },
-    "include": ["automator/*.ts"],
+    "include": ["automator/**/*.ts"],
     "exclude": ["extensions"]
 }
