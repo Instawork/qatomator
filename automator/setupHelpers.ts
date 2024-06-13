@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import logger from '../logger'
+import logger from './logger'
 import { Builder, By, Key, WebDriver } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import { ChromiumWebDriver } from 'selenium-webdriver/chromium'
-import { config } from '../config'
+import { config } from './config'
 
 /**
  * TO ADD

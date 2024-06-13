@@ -1,198 +1,100 @@
-#version: 2.1
-#
-#orbs:
-#  browser-tools: circleci/browser-tools@1.4.7
-#
-#parameters:
-#  test-automation-additional-tags:
-#    type: string
-#    default: "regression"
-#  skip-tags:
-#    type: string
-#    default: "bug"
-#  backend-url:
-#    type: string
-#    default: "https://qa.instawork.com"
-#    description: "Endpoint to run your test against, default is qa"
-#
-#jobs:
-#  web-ui-tests:
-#    docker:
-#      - image: cimg/node:21.4.0-browsers
-#    resource_class: large
-#    working_directory: ~/repo
-#    parameters:
-#      send-slack-notification:
-#        type: boolean
-#        default: true
-#      upload-to-allure-testops:
-#        type: boolean
-#        default: false
-#    steps:
-#      # page to refer: https://circleci.com/developer/orbs/orb/circleci/browser-tools
-#      - browser-tools/install-browser-tools:
-#          chrome-version: 124.0.6367.91
-#
-#      - run:
-#          name: Check version of installed node, browser, drivers
-#          command: |
-#            google-chrome --version
-#            export PATH="/usr/local/bin/chromedriver:$PATH"
-#            chromedriver --version
-#            firefox -v
-#            node -v
-#
-#      - checkout
-#
-#      - restore_cache:
-#          keys:
-#            - v1-dependencies-{{ checksum "nightwatch/package.json" }}
-#            # fallback to using the latest cache if no exact match is found
-#            - v1-dependencies-
-#      - run:
-#          name: Install dependencies and compile
-#          command: |
-#            cd nightwatch && yarn
-#            yarn compile
-#
-#      - save_cache:
-#          paths:
-#            - nightwatch/node_modules
-#          key: v1-dependencies-{{ checksum "nightwatch/package.json" }}
-#
-#      - run:
-#          name: Start the test
-#          command: |
-#            sed -i "s|https://demo.instawork.com|<< pipeline.parameters.backend-url >>|g" nightwatch/nightwatch.conf.js
-#            echo "======================= Nightwatch.conf.js ======================="
-#            cat nightwatch/nightwatch.conf.js
-#            echo "======================= Nightwatch.conf.js End ======================="
-#            echo "Hey, just wanna let you know.. you are using endpoint "<< pipeline.parameters.backend-url >>" and your awesome 😎"
-#            echo "Running tests with tag: << pipeline.parameters.test-automation-additional-tags >>"
-#            cd nightwatch
-#            if [[ "<< pipeline.parameters.backend-url >>" =~ "demo" ]]
-#            then
-#              echo "Running tests on DEMO environment"
-#              yarn test --workers=2 --headless  --tag << pipeline.parameters.test-automation-additional-tags >> --skiptags << pipeline.parameters.skip-tags >> --env DEMO || true
-#            elif [[ "<< pipeline.parameters.backend-url >>" =~ "staging" ]]
-#            then
-#              echo "Running tests on STAGING environment"
-#              yarn test --workers=2 --headless  --tag << pipeline.parameters.test-automation-additional-tags >> --skiptags << pipeline.parameters.skip-tags >> --env STAGING || true
-#            else
-#              echo "Running tests on QA environment"
-#              yarn test --workers=8 --headless --tag << pipeline.parameters.test-automation-additional-tags >> --skiptags << pipeline.parameters.skip-tags >> --env QA || true
-#            fi
-#            if  grep -q "fail" ~/repo/nightwatch/reports/minimal_report.json; then
-#                exit 1
-#            fi
-#
-#      - run:
-#          name: Ping results on Slack
-#          command: |
-#              if (<< parameters.send-slack-notification >>); then
-#                 node ~/repo/nightwatch/scripts/testSummaryToSlack.js ~/repo/nightwatch/reports $CIRCLE_BUILD_URL $QA_TOOLS_WEBHOOK_URL
-#              fi
-#          when: always
-#
-#      - when:
-#          condition:
-#            equal: [ true, << parameters.upload-to-allure-testops >> ]
-#          steps:
-#            - run:
-#                name: Install Allure and Allurectl
-#                when: always
-#                command: |
-#                  curl -fsSL https://github.com/allure-framework/allurectl/releases/latest/download/allurectl_linux_amd64 -o allurectl
-#                  chmod +x allurectl
-#            - run:
-#                name: Upload Allure report
-#                when: always
-#                command: |
-#                  ./allurectl upload --endpoint https://instawork.testops.cloud \
-#                    --token ${ALLURE_TESTOPS_TOKEN} \
-#                    --project-id 68 \
-#                    --launch-name "CircleCI Build << pipeline.number >>" \
-#                    nightwatch/allure-reports
-#
-#
-#      - store_test_results:
-#          path: ~/repo/nightwatch/reports
-#
-#      - store_artifacts:
-#          path: ~/repo/nightwatch/reports
-#
-#  update-test-cases:
-#    docker:
-#      - image: cimg/node:21.4.0-browsers
-#    resource_class: small
-#    steps:
-#        - checkout
-#        - run:
-#            name: Install dependencies and compile
-#            command: |
-#                cd nightwatch && yarn
-#        - run:
-#            name: Verify your test is added here
-#            command: |
-#                cd nightwatch && yarn ts-node scripts/genTestCases.ts
-#                echo "CHECK https://instawork.atlassian.net/wiki/spaces/EN/pages/3060105641"
-#                echo "Please? 🥺"
-#
-#workflows:
-#  web_ui_tests_per_pr:
-#    when:
-#      or:
-#        # Adhoc run on master triggered manually
-#        - and:
-#            - equal: [ master, << pipeline.git.branch >> ]
-#            - equal: [ api, << pipeline.trigger_source >> ]
-#        # Custom backend-url, mainly for demoservers
-#        - not:
-#            equal: [ https://qa.instawork.com, << pipeline.parameters.backend-url >> ]
-#        # All other branches during development
-#        - not:
-#            equal: [ master, << pipeline.git.branch >> ]
-#    jobs:
-#      - web-ui-tests:
+version: 2.1
+executors:
+  node-browser:
+    docker:
+      - image: cimg/node:20.14.0-browsers
+orbs:
+  browser-tools: circleci/browser-tools@1.4.7
+
+parameters:
+  backend-url:
+    type: string
+    default: "https://qa.instawork.com"
+    description: "Endpoint to run your test against, default is qa"
+  send-slack-notification:
+    type: boolean
+    default: false
+  prompt:
+    type: string
+    default: 'pass'
+    description: "Your prompt to QAtomator"
+  target-entry-point:
+    type: enum
+    default: 'landingPage'
+    enum: [ 'landingPage' ]
+
+
+jobs:
+  QAtomate:
+    executor: node-browser
+    resource_class: large
+    working_directory: ~/qatomator
+    parameters:
+    steps:
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
+      - run:
+          name: Check version of installed node, browser, drivers
+          command: |
+            google-chrome --version
+            export PATH="/usr/local/bin/chromedriver:$PATH"
+            chromedriver --version
+            node -v
+      - checkout
+      - restore_cache:
+          keys:
+            - node-modules-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install dependencies
+          command: yarn
+      - save_cache:
+          paths:
+            - node_modules
+          key: node-modules-{{ checksum "yarn.lock" }}
+      - run:
+          name: Prompting and Running QAtomator
+          command: |
+            GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
+            echo "GIT_COMMIT_DESC=$GIT_COMMIT_DESC"
+            if [[ "$GIT_COMMIT_DESC" =~ "qatomate" ]]
+            then
+              echo "Initialising extension"
+              nohup yarn start > qatomator.log 2>&1 &
+              sleep 10
+              echo "QAtomating!"
+              yarn ts-node automator/qatomate.ts
+            else
+              echo "'qatomate' command not found in commit message. Skipping."
+              exit 0
+            fi
+      #      - run:
+      #          name: Ping results on Slack
+      #          command: |
+      #              if (<< parameters.send-slack-notification >>); then
+      #                 node ~/repo/nightwatch/scripts/testSummaryToSlack.js ~/repo/nightwatch/reports $CIRCLE_BUILD_URL $QA_TOOLS_WEBHOOK_URL
+      #              fi
+      #          when: always
+      #      - store_test_results:
+      #          path: ~/
+      - store_artifacts:
+          path: ~/qatomator/artifacts
+
+workflows:
+  QAtomate:
+    # to trigger if prompt and entryPoint is provided above or other alternatives
+    #    when:
+    #      or:
+    #        - and:
+    #            - equal: [ master, << pipeline.git.branch >> ]
+    #            - equal: [ api, << pipeline.trigger_source >> ]
+    #        # Custom backend-url, mainly for demoservers
+    #        - not:
+    #            equal: [ https://qa.instawork.com, << pipeline.parameters.backend-url >> ]
+    jobs:
+      - QAtomate
 #          send-slack-notification: false
 #          context:
 #            - Slack
 #            - QA
-#
-#
-#  web_ui_tests_nightly:
-#    triggers:
-#      - schedule:
-#          cron: "30 0,8,13 * * *"
-#          filters:
-#            branches:
-#              only:
-#                - master
-#    jobs:
-#      - web-ui-tests:
-#          upload-to-allure-testops: true
-#          context:
-#            - Slack
-#            - QA
-#
-## On merge to masters
-#  update_test_cases:
-#    when:
-#      and:
-#        - equal: [ master, << pipeline.git.branch >> ]
-#        - equal: [ webhook, << pipeline.trigger_source >> ]
-#    jobs:
-#      - update-test-cases
-#
-##  for qatomator. Temp placement until path filter is implemented
-##            GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
-##            echo "GIT_COMMIT_DESC=$GIT_COMMIT_DESC"
-##            if [[ "$GIT_COMMIT_DESC" =~ "run-ai-explorer" ]]
-##            then
-##              cd extensions/ai-explorer && yarn
-##              mkdir p- ../../reports
-##              ls ../../
-##              nohup yarn start > ../../reports/nohup-ai-explorer.out 2>&1 &
-##              sleep 10
-##              cd ../../ && node tests/exploratory/another.js
-##              exit 0
+
+
