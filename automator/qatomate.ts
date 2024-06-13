@@ -1,11 +1,10 @@
 import { initialiseExtensionAndEnterPrompt, setupDriver } from './setupHelpers'
-import fs from 'fs'
-import { config } from '../config'
+import { config } from './config'
 
 const navigateAndQatomate = async () => {
     const driver = await setupDriver()
     try {
-        await driver.get('https://qa.instawork.com')
+        await driver.get(config.targetEnvUrl)
         await initialiseExtensionAndEnterPrompt(
             driver,
             'You are to login with username: Matthew2052Owensb353WebCompany@instawork.com and password test123 and book a shift for next week via "Book Instawork Pros"',
