@@ -1,7 +1,7 @@
 import winston from 'winston'
 const { combine, timestamp, colorize, printf } = winston.format
 
-const logger = winston.createLogger({
+export const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
     format: combine(
         timestamp({
@@ -26,5 +26,3 @@ const logger = winston.createLogger({
     exceptionHandlers: [new winston.transports.File({ filename: 'artifacts/exceptions.log' })],
     rejectionHandlers: [new winston.transports.File({ filename: 'artifacts/rejections.log' })],
 })
-
-export default logger

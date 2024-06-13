@@ -14,7 +14,7 @@
         "target": "esNext",
         /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
         // "lib": [],                                        /* Specify a set of bundled library declaration files that describe the target runtime environment. */
-        // "jsx": "preserve",                                /* Specify what JSX code is generated. */
+         "jsx": "react",                                /* Specify what JSX code is generated. */
         // "experimentalDecorators": true,                   /* Enable experimental support for legacy experimental decorators. */
         // "emitDecoratorMetadata": true,                    /* Emit design-type metadata for decorated declarations in source files. */
         // "jsxFactory": "",                                 /* Specify the JSX factory function used when targeting React JSX emit, e.g. 'React.createElement' or 'h'. */
@@ -35,7 +35,6 @@
         /* Specify the base directory to resolve non-relative module names. */
         //            "paths": {
         //      "utils/*": [
-        //        "/nightwatch_version_2.6.13/nightwatch/utils/*"
         //      ]
         //    },                                   /* Specify a set of entries that re-map imports to additional lookup locations. */
         // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
@@ -120,6 +119,5 @@
         "skipLibCheck": true
         /* Skip type checking all .d.ts files. */
     },
-    "include": ["automator/**/*.ts"],
-    "exclude": ["extensions"]
+    "include": ["**/*.ts", "**/*.tsx"],
 }

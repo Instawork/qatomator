@@ -1,31 +1,22 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function logMessage(message: any) {
-    const timestamp = new Date().toISOString()
-    const logEntry = `[${timestamp}] ${message}`
-
-    chrome.storage.local.get({ logs: [] }, function (result) {
-        const logs = result.logs
-        logs.push(logEntry)
-        chrome.storage.local.set({ logs: logs })
-    })
-    console.log(logEntry) // Also log to the console
-}
+import { storageLogger } from './chromeStorage'
 
 export function attachDebugger(tabId: number) {
     return new Promise<void>((resolve, reject) => {
         try {
             chrome.debugger.attach({ tabId }, '1.2', async () => {
                 if (chrome.runtime.lastError) {
-                    logMessage(`'Failed to attach debugger:', ${chrome.runtime.lastError.message}`)
+                    storageLogger(
+                        `'Failed to attach debugger:', ${chrome.runtime.lastError.message}`,
+                    )
                     reject(
                         new Error(`Failed to attach debugger: ${chrome.runtime.lastError.message}`),
                     )
                 } else {
-                    logMessage('attached to debugger')
+                    storageLogger('attached to debugger')
                     await chrome.debugger.sendCommand({ tabId }, 'DOM.enable')
-                    logMessage('DOM enabled')
+                    storageLogger('DOM enabled')
                     await chrome.debugger.sendCommand({ tabId }, 'Runtime.enable')
-                    logMessage('Runtime enabled')
+                    storageLogger('Runtime enabled')
                     resolve()
                 }
             })
