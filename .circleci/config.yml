@@ -31,7 +31,7 @@ jobs:
     working_directory: ~/qatomator
     parameters:
     steps:
-      - browser-tools/install-chrome:
+      - browser-tools/install-chrome
       - browser-tools/install-chromedriver
       - run:
           name: Check version of installed node, browser, drivers
