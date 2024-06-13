@@ -13,7 +13,7 @@ import { config } from './config'
  */
 export const setupDriver = async () => {
     const options = new chrome.Options()
-        // .addArguments('--headless=new')
+        .addArguments('--headless=new')
         .addArguments('--disable-gpu')
         .addArguments('--no-sandbox')
         .addArguments('--disable-dev-shm-usage')
