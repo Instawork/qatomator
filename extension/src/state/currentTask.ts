@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
 import { CreateCompletionResponseUsage } from 'openai'
 import { attachDebugger, detachDebugger } from '../helpers/chromeDebugger'
-import { disableIncompatibleExtensions, reenableExtensions } from '../helpers/disableExtensions'
+import { disableIncompatibleExtensions, reenableExtensions } from '../helpers/chromeManagement'
 import { callDOMAction } from '../helpers/domActions'
 import { ParsedResponse, ParsedResponseSuccess, parseResponse } from '../helpers/parseResponse'
 import { determineNextAction } from '../helpers/determineNextAction'
