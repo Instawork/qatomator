@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import logger from './logger'
+import { logger } from './logger'
 import { Builder, By, Key, WebDriver } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import { ChromiumWebDriver } from 'selenium-webdriver/chromium'
@@ -13,7 +13,7 @@ import { config } from './config'
  */
 export const setupDriver = async () => {
     const options = new chrome.Options()
-        .addArguments('--headless=new')
+        // .addArguments('--headless=new')
         .addArguments('--disable-gpu')
         .addArguments('--no-sandbox')
         .addArguments('--disable-dev-shm-usage')

@@ -1,4 +1,4 @@
-import logger from './logger'
+import { logger } from './logger'
 import findRoot from 'find-root'
 import path from 'path'
 import fs from 'fs'

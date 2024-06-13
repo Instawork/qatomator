@@ -8,19 +8,9 @@ import { determineNextAction } from '../helpers/determineNextAction'
 import templatize from '../helpers/templatize'
 import { getSimplifiedDom } from '../helpers/simplifyDom'
 import { truthyFilter } from '../helpers/utils'
-import { MyStateCreator } from './store'
-
-function logMessage(message: any) {
-    const timestamp = new Date().toISOString()
-    const logEntry = `[${timestamp}] ${message}`
-
-    chrome.storage.local.get({ logs: [] }, function (result) {
-        const logs = result.logs
-        logs.push(logEntry)
-        chrome.storage.local.set({ logs: logs })
-    })
-    console.log(logEntry) // Also log to the console
-}
+import { MyStateCreator, useAppState } from './store'
+import { takeScreenshot } from '../helpers/takeScreenshot'
+import { readStorageLogger, storageLogger } from '../helpers/chromeStorage'
 
 export type TaskHistoryEntry = {
     prompt: string
@@ -55,6 +45,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
     actionStatus: 'idle',
     actions: {
         runTask: async (onError) => {
+            const downloadProgress = useAppState.getState().settings.downloadProgress
             const wasStopped = () => get().currentTask.status !== 'running'
             const setActionStatus = (status: CurrentTaskSlice['actionStatus']) => {
                 set((state) => {
@@ -80,7 +71,6 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     queryOptions = { index: parseInt(<string>URL_PARAMS.get('tab')) }
                 }
                 const activeTab = (await chrome.tabs.query(queryOptions))[0]
-                logMessage(JSON.stringify(activeTab))
                 if (!activeTab.id) throw new Error('No active tab found')
 
                 const tabId = activeTab.id
@@ -88,16 +78,14 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     state.currentTask.tabId = tabId
                 })
 
-                logMessage('Adding debugger and disabling extensions')
+                storageLogger('Adding debugger and disabling extensions')
                 await attachDebugger(tabId)
                 await disableIncompatibleExtensions()
                 // eslint-disable-next-line no-constant-condition
                 while (true) {
-                    // await takeScreenshot(tabId, get().currentTask.history.length);
-
                     if (wasStopped()) break
 
-                    logMessage('pulling dom')
+                    storageLogger('pulling dom')
                     setActionStatus('pulling-dom')
                     const pageDOM = await getSimplifiedDom()
                     if (!pageDOM) {
@@ -109,7 +97,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     const html = pageDOM.outerHTML
 
                     if (wasStopped()) break
-                    logMessage('transforming dom')
+                    storageLogger('transforming dom')
                     setActionStatus('transforming-dom')
                     const currentDom = templatize(html)
 
@@ -117,7 +105,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         .currentTask.history.map((entry) => entry.action)
                         .filter(truthyFilter)
 
-                    logMessage('performing query')
+                    storageLogger('performing query')
                     setActionStatus('performing-query')
                     const query = await determineNextAction(
                         instructions,
@@ -136,7 +124,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                     if (wasStopped()) break
 
-                    logMessage('performing action')
+                    storageLogger('performing action')
                     setActionStatus('performing-action')
                     const action = parseResponse(query.response)
 
@@ -152,6 +140,26 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         onError(action.error)
                         break
                     }
+
+                    if (downloadProgress) {
+                        try {
+                            await takeScreenshot(tabId, get().currentTask.history.length)
+                            const key = `step-${get().currentTask.history.length}`
+                            const blob = new Blob([JSON.stringify(get().currentTask)], {
+                                type: 'application/json',
+                            })
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = `${key}.json`
+                            document.body.appendChild(a)
+                            a.click()
+                            document.body.removeChild(a)
+                        } catch (e) {
+                            console.error(e)
+                        }
+                    }
+
                     if (
                         action === null ||
                         action.parsedAction.name === 'finish' ||
@@ -166,24 +174,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         await callDOMAction(action?.parsedAction.name, action?.parsedAction.args)
                     }
 
-                    const key = `step-${get().currentTask.history.length}`
-                    logMessage(JSON.stringify(get().currentTask))
-                    // await chrome.storage.local.set({ [`step-${step}`]: taskHistory })
-
-                    const blob = new Blob([JSON.stringify(get().currentTask)], {
-                        type: 'application/json',
-                    })
-                    const url = URL.createObjectURL(blob)
-                    // await chrome.downloads.download({
-                    //     url: url,
-                    //     filename: `step-${key}.json`,
-                    // })
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `${key}.json`
-                    document.body.appendChild(a)
-                    a.click()
-                    document.body.removeChild(a)
+                    storageLogger(JSON.stringify(get().currentTask))
 
                     if (wasStopped()) break
 
@@ -243,6 +234,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
             } finally {
                 await detachDebugger(get().currentTask.tabId)
                 await reenableExtensions()
+                await readStorageLogger()
             }
         },
         interrupt: () => {

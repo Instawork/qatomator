@@ -2,6 +2,7 @@ import { MyStateCreator } from './store'
 
 export type SettingsSlice = {
     openAIKey: string | null
+    downloadProgress: boolean
     selectedModel: string
     actions: {
         update: (values: Partial<SettingsSlice>) => void
@@ -9,6 +10,7 @@ export type SettingsSlice = {
 }
 export const createSettingsSlice: MyStateCreator<SettingsSlice> = (set) => ({
     openAIKey: process.env.OPENAI_API_KEY ?? null,
+    downloadProgress: true,
     selectedModel: 'gpt-4o',
     actions: {
         update: (values) => {

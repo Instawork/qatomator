@@ -1,4 +1,12 @@
-import { HStack, Spacer, Textarea, useToast } from '@chakra-ui/react'
+import {
+    FormControl,
+    FormLabel,
+    HStack,
+    Spacer,
+    Switch,
+    Textarea,
+    useToast,
+} from '@chakra-ui/react'
 import React, { useCallback } from 'react'
 import { useAppState } from '../state/store'
 import RunTaskButton from './RunTaskButton'
@@ -12,6 +20,8 @@ const TaskUI = () => {
         runTask: state.currentTask.actions.runTask,
         instructions: state.ui.instructions,
         setInstructions: state.ui.actions.setInstructions,
+        downloadProgress: state.settings.downloadProgress,
+        updateSettings: state.settings.actions.update,
     }))
 
     const taskInProgress = state.taskStatus === 'running'
@@ -42,6 +52,10 @@ const TaskUI = () => {
         }
     }
 
+    const toggleSaveScreenshot = (e: React.ChangeEvent<HTMLInputElement>) => {
+        state.updateSettings({ downloadProgress: e.target.checked })
+    }
+
     return (
         <>
             <Textarea
@@ -58,6 +72,17 @@ const TaskUI = () => {
                 <RunTaskButton runTask={runTask} />
                 <Spacer />
                 {debugMode && <TaskStatus />}
+                <FormControl display="flex" alignItems="center">
+                    <FormLabel htmlFor="save-screenshot" mb="0">
+                        Download Progress
+                    </FormLabel>
+                    <Switch
+                        id="download-progress-toggle"
+                        isChecked={state.downloadProgress}
+                        onChange={toggleSaveScreenshot}
+                        data-testid="download-progress-toggle"
+                    />
+                </FormControl>
             </HStack>
             <TaskHistory />
         </>
