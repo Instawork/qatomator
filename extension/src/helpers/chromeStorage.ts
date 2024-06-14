@@ -1,8 +1,6 @@
-import { config } from '../../../automator/config'
-
 type storageKeys = 'logs' | 'addOthersInTheFutureHere'
 
-export const storageLogger = (message: string | object, key: storageKeys = 'logs') => {
+export const storageLogger = async (message: string | object, key: storageKeys = 'logs') => {
     const timestamp = new Date().toISOString()
     const logEntry = `[${timestamp}] ${message}`
 
@@ -11,7 +9,6 @@ export const storageLogger = (message: string | object, key: storageKeys = 'logs
         logs.push(logEntry)
         chrome.storage.local.set({ [key]: logs })
     })
-
     console.log(logEntry)
 }
 

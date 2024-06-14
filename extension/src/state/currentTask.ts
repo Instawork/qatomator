@@ -10,7 +10,7 @@ import { getSimplifiedDom } from '../helpers/simplifyDom'
 import { truthyFilter } from '../helpers/utils'
 import { MyStateCreator, useAppState } from './store'
 import { takeScreenshot } from '../helpers/takeScreenshot'
-import { readStorageLogger, storageLogger } from '../helpers/chromeStorage'
+import { readStorageLogger } from '../helpers/chromeStorage'
 
 export type TaskHistoryEntry = {
     prompt: string
@@ -78,14 +78,14 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     state.currentTask.tabId = tabId
                 })
 
-                storageLogger('Adding debugger and disabling extensions')
+                console.log('Adding debugger and disabling extensions')
                 await attachDebugger(tabId)
                 await disableIncompatibleExtensions()
                 // eslint-disable-next-line no-constant-condition
                 while (true) {
                     if (wasStopped()) break
 
-                    storageLogger('pulling dom')
+                    console.log('pulling dom')
                     setActionStatus('pulling-dom')
                     const pageDOM = await getSimplifiedDom()
                     if (!pageDOM) {
@@ -97,7 +97,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     const html = pageDOM.outerHTML
 
                     if (wasStopped()) break
-                    storageLogger('transforming dom')
+                    console.log('transforming dom')
                     setActionStatus('transforming-dom')
                     const currentDom = templatize(html)
 
@@ -105,7 +105,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         .currentTask.history.map((entry) => entry.action)
                         .filter(truthyFilter)
 
-                    storageLogger('performing query')
+                    console.log('performing query')
                     setActionStatus('performing-query')
                     const query = await determineNextAction(
                         instructions,
@@ -124,7 +124,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                     if (wasStopped()) break
 
-                    storageLogger('performing action')
+                    console.log('performing action')
                     setActionStatus('performing-action')
                     const action = parseResponse(query.response)
 
@@ -155,6 +155,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                             document.body.appendChild(a)
                             a.click()
                             document.body.removeChild(a)
+                            await readStorageLogger()
                         } catch (e) {
                             console.error(e)
                         }
@@ -174,20 +175,15 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         await callDOMAction(action?.parsedAction.name, action?.parsedAction.args)
                     }
 
-                    storageLogger(JSON.stringify(get().currentTask))
-
                     if (wasStopped()) break
 
                     // While testing let's automatically stop after 50 actions to avoid
                     // infinite loops
-                    if (get().currentTask.history.length >= 50) {
+                    if (get().currentTask.history.length >= 30) {
                         break
                     }
 
                     setActionStatus('waiting')
-                    // // todo: sleep 2 seconds. This is pretty arbitrary; we should figure out a better way to determine when the page has settled.
-                    // await sleep(5000) // booking form page seems to take awhile...
-
                     const waitForPageLoad = (timeout: number = 60000): Promise<void> => {
                         return new Promise<void>((resolve) => {
                             const checkReadyState = () => {
@@ -234,7 +230,8 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
             } finally {
                 await detachDebugger(get().currentTask.tabId)
                 await reenableExtensions()
-                await readStorageLogger()
+                console.log(JSON.stringify(get().currentTask, null, 2))
+                console.log('[TERMINATE_ME]')
             }
         },
         interrupt: () => {

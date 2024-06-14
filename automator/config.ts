@@ -5,15 +5,20 @@ import fs from 'fs'
 
 interface Config {
     openAiKey: string
+    maxTimeout: number
     targetEnvUrl: string
     extensionBuildDir: string
     artifactsDir: string
     downloadsDir: string
 }
 
+/**
+ * TO ADD
+ */
 export const config: Config = {
     openAiKey: process.env.OPENAI_API_KEY || '',
-    targetEnvUrl: process.env.BACKEND_URL || 'https://qa.instawork.com',
+    maxTimeout: 600000, // 10 minutes
+    targetEnvUrl: process.env.BACKEND_URL ?? 'https://qa.instawork.com',
     extensionBuildDir: path.resolve(findRoot(__dirname), 'extension/build'),
     artifactsDir: path.resolve(findRoot(__dirname), 'artifacts'),
     downloadsDir: path.resolve(findRoot(__dirname), 'artifacts/downloads'),
