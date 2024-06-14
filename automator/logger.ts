@@ -2,7 +2,7 @@ import winston from 'winston'
 const { combine, timestamp, colorize, printf } = winston.format
 
 export const logger = winston.createLogger({
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL || 'debug',
     format: combine(
         timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
@@ -28,7 +28,7 @@ export const logger = winston.createLogger({
 })
 
 export const extensionLogger = winston.createLogger({
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL || 'debug',
     format: combine(
         timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',

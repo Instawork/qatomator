@@ -106,15 +106,17 @@ export const trackExtensionLogs = async (driver: WebDriver) => {
     const client = await CDP({ target: cdpConnection._wsConnection._url })
     const setupListeners = async () => {
         client.on('Runtime.consoleAPICalled', async (event) => {
-            const args = event.args // expand this to include error, info, etc.
-            extensionLogger.info(JSON.stringify(args, null, 2))
-            if (
-                args.length &&
-                args[0].value &&
-                args[0].value.includes(signals.extensionTerminateSignal)
-            ) {
-                logger.info('Received task completion signal from extension')
-                signals.keepAlive = false
+            const args = event.args
+            if (args.length && args[0].value) {
+                if (['log', 'debug', 'info'].includes(event.type))
+                    extensionLogger.info(args[0].value)
+                else if (['warn'].includes(event.type)) extensionLogger.warn(args[0].value)
+                else if (['error'].includes(event.type)) extensionLogger.error(args[0].value)
+                else extensionLogger.debug(`${event.type}: ${args[0].value}`)
+                if (args[0].value.includes(signals.extensionTerminateSignal)) {
+                    logger.info('Received task completion signal from extension')
+                    signals.keepAlive = false
+                }
             }
         })
     }
@@ -123,7 +125,7 @@ export const trackExtensionLogs = async (driver: WebDriver) => {
     await client.Runtime.enable()
     await client.Page.enable()
     client.on('Page.frameNavigated', async (event) => {
-        logger.info('Page has navigated to:', event.frame.url)
-        await setupListeners()
+        logger.info(`Page has navigated to: ${event.frame.url}`)
+        await client.Runtime.enable()
     })
 }
