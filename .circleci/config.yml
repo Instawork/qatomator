@@ -52,7 +52,7 @@ jobs:
             - node_modules
           key: node-modules-{{ checksum "yarn.lock" }}
       - run:
-          name: Prompting and Running QAtomator
+          name: Running QAtomator
           command: |
             GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
             echo "GIT_COMMIT_DESC=$GIT_COMMIT_DESC"

@@ -179,7 +179,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                     // While testing let's automatically stop after 50 actions to avoid
                     // infinite loops
-                    if (get().currentTask.history.length >= 30) {
+                    if (get().currentTask.history.length >= 20) {
                         break
                     }
 
