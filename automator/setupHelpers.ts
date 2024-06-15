@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { extensionLogger, logger } from './logger'
+import { logger } from './logger'
 import { Builder, By, Key, logging, WebDriver } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import { ChromiumWebDriver } from 'selenium-webdriver/chromium'
 import { config } from './config'
-import CDP from 'chrome-remote-interface'
-import { signals } from './signals'
 
 /**
  * TO ADD
