@@ -3,7 +3,6 @@ type storageKeys = 'logs' | 'addOthersInTheFutureHere'
 export const storageLogger = async (message: string | object, key: storageKeys = 'logs') => {
     const timestamp = new Date().toISOString()
     const logEntry = `[${timestamp}] ${message}`
-
     chrome.storage.local.get({ [key]: [] }, (result) => {
         const logs = result[key] as string[]
         logs.push(logEntry)
@@ -13,7 +12,7 @@ export const storageLogger = async (message: string | object, key: storageKeys =
 }
 
 export const readStorageLogger = async (key: storageKeys = 'logs', download = true) => {
-    return chrome.storage.local.get(key, (result) => {
+    return chrome.storage.session.get(key, (result) => {
         const logs = result[key] as string[]
         if (download) {
             const logsString = logs.join('\n')
@@ -23,7 +22,7 @@ export const readStorageLogger = async (key: storageKeys = 'logs', download = tr
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url
-            a.download = `${key}.txt`
+            a.download = `chromestorage-${key}.txt`
             document.body.appendChild(a)
             a.click()
             document.body.removeChild(a)

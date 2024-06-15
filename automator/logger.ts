@@ -24,7 +24,7 @@ export const logger = winston.createLogger({
         }),
     ],
     exceptionHandlers: [new winston.transports.File({ filename: 'artifacts/exceptions.log' })],
-    rejectionHandlers: [new winston.transports.File({ filename: 'artifacts/rejections.log' })],
+    // rejectionHandlers: [new winston.transports.File({ filename: 'artifacts/rejections.log' })],
 })
 
 export const extensionLogger = winston.createLogger({

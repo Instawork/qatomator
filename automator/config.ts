@@ -10,7 +10,6 @@ interface Config {
     extensionBuildDir: string
     artifactsDir: string
     downloadsDir: string
-    qatomatorLogPath: string
 }
 
 /**
@@ -23,7 +22,6 @@ export const config: Config = {
     extensionBuildDir: path.resolve(findRoot(__dirname), 'extension/build'),
     artifactsDir: path.resolve(findRoot(__dirname), 'artifacts'),
     downloadsDir: path.resolve(findRoot(__dirname), 'artifacts/downloads'),
-    qatomatorLogPath: path.resolve(findRoot(__dirname), 'artifacts/qatomator.log'),
 }
 
 if (!config.openAiKey) {

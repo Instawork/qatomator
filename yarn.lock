@@ -2371,10 +2371,10 @@
   dependencies:
     devtools-protocol "0.0.927104"
 
-"@types/chrome@^0.0.202":
-  version "0.0.202"
-  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.202.tgz#ecc6747cc797b6b8427cbb5d9723c91dfc8bd3f4"
-  integrity sha512-Oc4daL9sFS+9MToVZPLMBxR7PxsEdod0b8wOY11lRr06GJp43MORvHeDyMD8QzeRGT6HI13oaYAe2PBgvALc4w==
+"@types/chrome@^0.0.268":
+  version "0.0.268"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.268.tgz#d5855546f30c83e181cadd77127a162c25b480d2"
+  integrity sha512-7N1QH9buudSJ7sI8Pe4mBHJr5oZ48s0hcanI9w3wgijAlv1OZNUZve9JR4x42dn5lJ5Sm87V1JNfnoh10EnQlA==
   dependencies:
     "@types/filesystem" "*"
     "@types/har-format" "*"

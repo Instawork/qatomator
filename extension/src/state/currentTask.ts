@@ -10,7 +10,7 @@ import { getSimplifiedDom } from '../helpers/simplifyDom'
 import { truthyFilter } from '../helpers/utils'
 import { MyStateCreator, useAppState } from './store'
 import { takeScreenshot } from '../helpers/takeScreenshot'
-import { readStorageLogger } from '../helpers/chromeStorage'
+import { readStorageLogger, storageLogger } from '../helpers/chromeStorage'
 
 export type TaskHistoryEntry = {
     prompt: string
@@ -78,14 +78,14 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     state.currentTask.tabId = tabId
                 })
 
-                console.log('Adding debugger and disabling extensions')
+                await storageLogger('Adding debugger and disabling extensions')
                 await attachDebugger(tabId)
                 await disableIncompatibleExtensions()
                 // eslint-disable-next-line no-constant-condition
                 while (true) {
                     if (wasStopped()) break
 
-                    console.log('pulling dom')
+                    await storageLogger('pulling dom')
                     setActionStatus('pulling-dom')
                     const pageDOM = await getSimplifiedDom()
                     if (!pageDOM) {
@@ -97,7 +97,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     const html = pageDOM.outerHTML
 
                     if (wasStopped()) break
-                    console.log('transforming dom')
+                    await storageLogger('transforming dom')
                     setActionStatus('transforming-dom')
                     const currentDom = templatize(html)
 
@@ -105,7 +105,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         .currentTask.history.map((entry) => entry.action)
                         .filter(truthyFilter)
 
-                    console.log('performing query')
+                    await storageLogger('performing query')
                     setActionStatus('performing-query')
                     const query = await determineNextAction(
                         instructions,
@@ -124,7 +124,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                     if (wasStopped()) break
 
-                    console.log('performing action')
+                    await storageLogger('performing action')
                     setActionStatus('performing-action')
                     const action = parseResponse(query.response)
 
@@ -155,7 +155,6 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                             document.body.appendChild(a)
                             a.click()
                             document.body.removeChild(a)
-                            await readStorageLogger()
                         } catch (e) {
                             console.error(e)
                         }
@@ -179,7 +178,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                     // While testing let's automatically stop after 50 actions to avoid
                     // infinite loops
-                    if (get().currentTask.history.length >= 20) {
+                    if (get().currentTask.history.length >= 10) {
                         break
                     }
 
@@ -230,8 +229,18 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
             } finally {
                 await detachDebugger(get().currentTask.tabId)
                 await reenableExtensions()
-                console.log(JSON.stringify(get().currentTask, null, 2))
-                console.log('[TERMINATE_ME]')
+                await storageLogger(JSON.stringify(get().currentTask, null, 2))
+                const key = `TERMINATE_ME`
+                const blob = new Blob([JSON.stringify(get().currentTask)], {
+                    type: 'application/json',
+                })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${key}.json`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
             }
         },
         interrupt: () => {

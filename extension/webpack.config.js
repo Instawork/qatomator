@@ -161,10 +161,8 @@ var options = {
 }
 
 if (env.NODE_ENV === 'development') {
-    console.log(env.NODE_ENV, 1234)
     options.devtool = 'cheap-module-source-map'
 } else {
-    console.log(4312)
     options.optimization = {
         minimize: true,
         minimizer: [
