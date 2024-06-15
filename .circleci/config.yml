@@ -59,7 +59,7 @@ jobs:
             if [[ "$GIT_COMMIT_DESC" =~ "qatomate" ]]
             then
               echo "Initialising extension"
-              nohup yarn start > qatomator.log 2>&1 &
+              yarn start
               sleep 10
               echo "QAtomating!"
               yarn ts-node automator/qatomate.ts

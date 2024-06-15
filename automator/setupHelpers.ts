@@ -111,7 +111,7 @@ export const trackExtensionLogs = async (driver: WebDriver) => {
         if (args.length && args[0].value) {
             if (['log', 'debug', 'info'].includes(event.type)) {
                 extensionLogger.info(JSON.stringify(args[0].value))
-            } else if (['warn'].includes(event.type)) {
+            } else if (['warning'].includes(event.type)) {
                 extensionLogger.warn(JSON.stringify(args[0].value))
             } else if (['error'].includes(event.type)) {
                 extensionLogger.error(JSON.stringify(args[0].value))
@@ -124,20 +124,9 @@ export const trackExtensionLogs = async (driver: WebDriver) => {
             }
         }
     })
-    client.on('Log.entryAdded', (entry) => {
-        const logEntry = entry.entry
-        const logMessage = `[Log][${logEntry.level}] ${logEntry.text}`
-        extensionLogger.info(logMessage)
-    })
-
-    // Handle Console messages
-    client.on('Console.messageAdded', (message) => {
-        const logMessage = `[Console][${JSON.stringify(message)}`
-        extensionLogger.info(logMessage)
-    })
+    // }
+    // await setupListeners()
     await client.Runtime.enable()
-    await client.Log.enable()
-    await client.Console.enable()
     // await client.Page.enable()
     // client.on('Page.frameNavigated', async (event) => {
     //     logger.info(`Page has navigated to: ${event.frame.url}`)
