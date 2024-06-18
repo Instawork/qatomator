@@ -78,14 +78,14 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     state.currentTask.tabId = tabId
                 })
 
-                storageLogger('Adding debugger and disabling extensions')
+                await storageLogger('Adding debugger and disabling extensions')
                 await attachDebugger(tabId)
                 await disableIncompatibleExtensions()
                 // eslint-disable-next-line no-constant-condition
                 while (true) {
                     if (wasStopped()) break
 
-                    storageLogger('pulling dom')
+                    await storageLogger('pulling dom')
                     setActionStatus('pulling-dom')
                     const pageDOM = await getSimplifiedDom()
                     if (!pageDOM) {
@@ -97,7 +97,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     const html = pageDOM.outerHTML
 
                     if (wasStopped()) break
-                    storageLogger('transforming dom')
+                    await storageLogger('transforming dom')
                     setActionStatus('transforming-dom')
                     const currentDom = templatize(html)
 
@@ -105,7 +105,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         .currentTask.history.map((entry) => entry.action)
                         .filter(truthyFilter)
 
-                    storageLogger('performing query')
+                    await storageLogger('performing query')
                     setActionStatus('performing-query')
                     const query = await determineNextAction(
                         instructions,
@@ -124,7 +124,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                     if (wasStopped()) break
 
-                    storageLogger('performing action')
+                    await storageLogger('performing action')
                     setActionStatus('performing-action')
                     const action = parseResponse(query.response)
 
@@ -174,20 +174,15 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         await callDOMAction(action?.parsedAction.name, action?.parsedAction.args)
                     }
 
-                    storageLogger(JSON.stringify(get().currentTask))
-
                     if (wasStopped()) break
 
                     // While testing let's automatically stop after 50 actions to avoid
                     // infinite loops
-                    if (get().currentTask.history.length >= 50) {
+                    if (get().currentTask.history.length >= 10) {
                         break
                     }
 
                     setActionStatus('waiting')
-                    // // todo: sleep 2 seconds. This is pretty arbitrary; we should figure out a better way to determine when the page has settled.
-                    // await sleep(5000) // booking form page seems to take awhile...
-
                     const waitForPageLoad = (timeout: number = 60000): Promise<void> => {
                         return new Promise<void>((resolve) => {
                             const checkReadyState = () => {
@@ -234,7 +229,18 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
             } finally {
                 await detachDebugger(get().currentTask.tabId)
                 await reenableExtensions()
-                await readStorageLogger()
+                await storageLogger(JSON.stringify(get().currentTask, null, 2))
+                const key = `TERMINATE_ME`
+                const blob = new Blob([JSON.stringify(get().currentTask)], {
+                    type: 'application/json',
+                })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${key}.json`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
             }
         },
         interrupt: () => {

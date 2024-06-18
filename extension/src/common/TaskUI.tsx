@@ -25,7 +25,7 @@ const TaskUI = () => {
     }))
 
     const taskInProgress = state.taskStatus === 'running'
-    const debugMode = process.env.DEBUG_MODE || true
+    const debugMode = true
 
     const toast = useToast()
     const toastError = useCallback(

@@ -2,7 +2,7 @@ import winston from 'winston'
 const { combine, timestamp, colorize, printf } = winston.format
 
 export const logger = winston.createLogger({
-    level: process.env.LOG_LEVEL || 'info',
+    level: process.env.LOG_LEVEL || 'debug',
     format: combine(
         timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
@@ -10,6 +10,9 @@ export const logger = winston.createLogger({
         printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`),
     ),
     transports: [
+        new winston.transports.File({
+            filename: 'artifacts/logs.log',
+        }),
         new winston.transports.Console({
             format: combine(
                 colorize(),
@@ -18,9 +21,6 @@ export const logger = winston.createLogger({
                 }),
                 printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`),
             ),
-        }),
-        new winston.transports.File({
-            filename: 'artifacts/logs.log',
         }),
     ],
     exceptionHandlers: [new winston.transports.File({ filename: 'artifacts/exceptions.log' })],

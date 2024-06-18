@@ -1,5 +1,3 @@
-import { storageLogger } from './chromeStorage'
-
 const incompatibleExtensions = [
     'fdjamakpfbbddfjaooikfcpapjohcfmg', // Dashlane
     'hdokiejnpimakedhajhdlcegeplioahd', // LastPass
@@ -11,11 +9,9 @@ const disableCounts: Record<string, number> = {}
 
 const _getExtensions = async () => {
     return new Promise<chrome.management.ExtensionInfo[]>((resolve, reject) => {
-        chrome.management.getAll((extensions) => {
+        chrome.management.getAll(async (extensions) => {
             if (chrome.runtime.lastError) {
-                storageLogger(
-                    `[Error] Failed to get extensions: ${chrome.runtime.lastError.message}`,
-                )
+                console.log(`[Error] Failed to get extensions: ${chrome.runtime.lastError.message}`)
                 reject(chrome.runtime.lastError)
             } else {
                 resolve(extensions.filter((extension) => extension.type === 'extension'))
@@ -30,9 +26,9 @@ export const disableIncompatibleExtensions = async () => {
     )
 
     for (const extension of targetExtensions) {
-        chrome.management.setEnabled(extension.id, false, () => {
+        chrome.management.setEnabled(extension.id, false, async () => {
             if (chrome.runtime.lastError) {
-                storageLogger(
+                console.log(
                     `[Error] Failed to disable extension ${extension.id}: ${chrome.runtime.lastError.message}`,
                 )
             }
@@ -52,9 +48,9 @@ export const reenableExtensions = async () => {
             disableCounts[extension.id] = disableCounts[extension.id] - 1
         } else if (disableCounts[extension.id] === 1) {
             await new Promise((resolve, reject) => {
-                chrome.management.setEnabled(extension.id, true, () => {
+                chrome.management.setEnabled(extension.id, true, async () => {
                     if (chrome.runtime.lastError) {
-                        storageLogger(
+                        console.log(
                             `Failed to enable extension ${extension.id}: ${chrome.runtime.lastError.message}`,
                         )
                         reject(chrome.runtime.lastError)

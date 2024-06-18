@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { logger } from './logger'
-import { Builder, By, Key, WebDriver } from 'selenium-webdriver'
+import { Builder, By, Key, logging, WebDriver } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import { ChromiumWebDriver } from 'selenium-webdriver/chromium'
 import { config } from './config'
@@ -26,9 +26,9 @@ export const setupDriver = async () => {
             'download.directory_upgrade': true,
         })
 
-    // const prefs = new logging.Preferences()
-    // prefs.setLevel(logging.Type.CLIENT, logging.Level.ALL)
-    //     options.setLoggingPrefs(prefs)
+    const prefs = new logging.Preferences()
+    prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL)
+    options.setLoggingPrefs(prefs)
 
     const driver = await new Builder()
         .forBrowser('chrome')
@@ -64,7 +64,7 @@ export const initialiseExtensionAndEnterPrompt = async (driver: WebDriver, promp
             if (attempts < maxRetries) {
                 await driver.sleep(2000)
                 logger.warn(`Attempt ${attempts} failed". Extension not loaded. Retrying...`)
-                return getExtensionUrl(attempts++)
+                return getExtensionUrl(attempts + 1)
             } else {
                 logger.error(`Failed to get extension target after ${maxRetries} attempts`)
                 throw new Error('Failed to get extension target')
@@ -91,3 +91,42 @@ export const initialiseExtensionAndEnterPrompt = async (driver: WebDriver, promp
 
     logger.info('Extension initialised, prompt entered, QAtomator taking over.')
 }
+
+/**
+ * TO ADD
+ *
+ * @returns A useful value.
+ * @param driver
+ * @param keepAlive
+ */
+// export const trackExtensionLogs = async (driver: WebDriver) => {
+//     const cdpConnection = await driver.createCDPConnection('page')
+//     const client = await CDP({ target: cdpConnection._wsConnection._url })
+//     // const setupListeners = async () => {
+//     client.on('Runtime.consoleAPICalled', async (event) => {
+//         const args = event.args
+//         if (args.length && args[0].value) {
+//             if (['log', 'debug', 'info'].includes(event.type)) {
+//                 extensionLogger.info(JSON.stringify(args[0].value))
+//             } else if (['warning'].includes(event.type)) {
+//                 extensionLogger.warn(JSON.stringify(args[0].value))
+//             } else if (['error'].includes(event.type)) {
+//                 extensionLogger.error(JSON.stringify(args[0].value))
+//             } else {
+//                 extensionLogger.debug(`${event.type}: ${JSON.stringify(args[0].value)}`)
+//             }
+//             if (args[0].value.includes(signals.extensionTerminateSignal)) {
+//                 logger.info('Received task completion signal from extension')
+//                 signals.keepAlive = false
+//             }
+//         }
+//     })
+//     // }
+//     // await setupListeners()
+//     await client.Runtime.enable()
+//     // await client.Page.enable()
+//     // client.on('Page.frameNavigated', async (event) => {
+//     //     logger.info(`Page has navigated to: ${event.frame.url}`)
+//     //     await client.Runtime.enable()
+//     // })
+// }

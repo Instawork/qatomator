@@ -27,7 +27,7 @@ parameters:
 jobs:
   QAtomate:
     executor: node-browser
-    resource_class: large
+    resource_class: medium
     working_directory: ~/qatomator
     parameters:
     steps:
@@ -52,14 +52,14 @@ jobs:
             - node_modules
           key: node-modules-{{ checksum "yarn.lock" }}
       - run:
-          name: Prompting and Running QAtomator
+          name: Running QAtomator
           command: |
             GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
             echo "GIT_COMMIT_DESC=$GIT_COMMIT_DESC"
             if [[ "$GIT_COMMIT_DESC" =~ "qatomate" ]]
             then
               echo "Initialising extension"
-              nohup yarn start > qatomator.log 2>&1 &
+              yarn start
               sleep 10
               echo "QAtomating!"
               yarn ts-node automator/qatomate.ts

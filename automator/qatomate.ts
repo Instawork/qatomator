@@ -1,25 +1,33 @@
 import { initialiseExtensionAndEnterPrompt, setupDriver } from './setupHelpers'
 import { config } from './config'
+import { logger } from './logger'
+import fs from 'fs'
 
-const navigateAndQatomate = async () => {
-    const driver = await setupDriver()
+const prompt =
+    'You are to login with username: Allie_Weber@hotmail.com and password 12345. ' +
+    'Then book a shift for next week via "Book Instawork Pros"'
+
+const navigateAndQatomate = async (prompt: string) => {
     try {
-        await driver.get(config.targetEnvUrl)
-        await initialiseExtensionAndEnterPrompt(
-            driver,
-            'You are to login with username: Matthew2052Owensb353WebCompany@instawork.com and password test123 and book a shift for next week via "Book Instawork Pros"',
-        )
+        const driver = await setupDriver()
+        await driver.get(config.targetEnvUrl) // Todo: expand to different entrypoints
+        await initialiseExtensionAndEnterPrompt(driver, prompt)
 
-        // Capture screenshots
-        // const screenshot1 = await driver.takeScreenshot()
-        // fs.writeFileSync(`${config.artifactsDir}/starting-run.png`, screenshot1, 'base64')
-        await driver.sleep(120000) // todo: Wait for signal from extension to end run
-        // let screenshot2 = await driver.takeScreenshot()
-        // fs.writeFileSync('reports/ending-run-soon.png', screenshot2, 'base64')
-        // await driver.sleep(10000)
-    } finally {
-        await driver.quit()
+        fs.watch(config.downloadsDir, (eventType, filename) => {
+            if (filename === 'TERMINATE_ME.json') {
+                logger.info('Received TERMINATE_ME.json. Stopping run')
+                driver.quit()
+                process.exit(0)
+            }
+        })
+        setTimeout(async () => {
+            logger.info('Timeout reached. Stopping run')
+            process.exit(0)
+        }, config.maxTimeout)
+    } catch (e) {
+        logger.info('Error occurred', e)
+        process.exit(1)
     }
 }
 
-navigateAndQatomate()
+navigateAndQatomate(prompt)

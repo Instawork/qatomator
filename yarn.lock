@@ -2364,10 +2364,17 @@
   dependencies:
     "@types/node" "*"
 
-"@types/chrome@^0.0.202":
-  version "0.0.202"
-  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.202.tgz#ecc6747cc797b6b8427cbb5d9723c91dfc8bd3f4"
-  integrity sha512-Oc4daL9sFS+9MToVZPLMBxR7PxsEdod0b8wOY11lRr06GJp43MORvHeDyMD8QzeRGT6HI13oaYAe2PBgvALc4w==
+"@types/chrome-remote-interface@^0.31.14":
+  version "0.31.14"
+  resolved "https://registry.yarnpkg.com/@types/chrome-remote-interface/-/chrome-remote-interface-0.31.14.tgz#173842a9a8e9995d5111ce209aa883fc90cedd96"
+  integrity sha512-H9hTcLu1y+Ms6GDPXXeGhgxaOSD69yEo674vjJw5EeW1tTwYo8fEkf7A9nWlnO6ArJsS7c41iZeX6mRDQ1LhEw==
+  dependencies:
+    devtools-protocol "0.0.927104"
+
+"@types/chrome@^0.0.268":
+  version "0.0.268"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.268.tgz#d5855546f30c83e181cadd77127a162c25b480d2"
+  integrity sha512-7N1QH9buudSJ7sI8Pe4mBHJr5oZ48s0hcanI9w3wgijAlv1OZNUZve9JR4x42dn5lJ5Sm87V1JNfnoh10EnQlA==
   dependencies:
     "@types/filesystem" "*"
     "@types/har-format" "*"
@@ -3423,6 +3430,14 @@ chownr@^2.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-2.0.0.tgz#15bfbe53d2eab4cf70f18a8cd68ebe5b3cb1dece"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
+chrome-remote-interface@^0.33.0:
+  version "0.33.0"
+  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.33.0.tgz#9140b5612ee5cdc39212cd0296d3b61ea881c47a"
+  integrity sha512-tv/SgeBfShXk43fwFpQ9wnS7mOCPzETnzDXTNxCb6TqKOiOeIfbrJz+2NAp8GmzwizpKa058wnU1Te7apONaYg==
+  dependencies:
+    commander "2.11.x"
+    ws "^7.2.0"
+
 chrome-trace-event@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/chrome-trace-event/-/chrome-trace-event-1.0.3.tgz#1015eced4741e15d06664a957dbbf50d041e26ac"
@@ -3539,6 +3554,11 @@ comma-separated-tokens@^1.0.0:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/comma-separated-tokens/-/comma-separated-tokens-1.0.8.tgz#632b80b6117867a158f1080ad498b2fbe7e3f5ea"
   integrity sha512-GHuDRO12Sypu2cV70d1dkA2EUmXHgntrzbpvOB+Qy+49ypNfGgFQIC2fhhXbnyrJRynDCAARsT7Ou0M6hirpfw==
+
+commander@2.11.x:
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.11.0.tgz#157152fd1e7a6c8d98a5b715cf376df928004563"
+  integrity sha512-b0553uYA5YAEGgyYIGYROzKQ7X5RAqedkfjiZxwi0kL1g3bOaBNNZfYkzt/CL0umgD5wc9Jec2FbB98CjkMRvQ==
 
 commander@^2.20.0:
   version "2.20.3"
@@ -3859,6 +3879,11 @@ detect-node@^2.0.4:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/detect-node/-/detect-node-2.1.0.tgz#c9c70775a49c3d03bc2c06d9a73be550f978f8b1"
   integrity sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==
+
+devtools-protocol@0.0.927104:
+  version "0.0.927104"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.927104.tgz#3bba0fca644bcdce1bcebb10ae392ab13428a7a0"
+  integrity sha512-5jfffjSuTOv0Lz53wTNNTcCUV8rv7d82AhYcapj28bC2B5tDxEZzVb7k51cNxZP2KHw24QE+sW7ZuSeD9NfMpA==
 
 diff@^4.0.1:
   version "4.0.2"
@@ -7842,6 +7867,11 @@ ws@>=8.16.0, ws@^8.13.0:
   version "8.17.0"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.17.0.tgz#d145d18eca2ed25aaf791a183903f7be5e295fea"
   integrity sha512-uJq6108EgZMAl20KagGkzCKfMEjxmKvZHG7Tlq0Z6nOky7YF7aq4mOx6xK8TJ/i1LeK4Qus7INktacctDgY8Ow==
+
+ws@^7.2.0:
+  version "7.5.9"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.9.tgz#54fa7db29f4c7cec68b1ddd3a89de099942bb591"
+  integrity sha512-F+P9Jil7UiSKSkppIiD94dN07AwvFixvLIj1Og1Rl9GGMuNipJnV9JzjD6XuqmAeiswGvUmNLjr5cFuXwNS77Q==
 
 xtend@^4.0.0:
   version "4.0.2"

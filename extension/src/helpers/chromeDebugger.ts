@@ -1,22 +1,18 @@
-import { storageLogger } from './chromeStorage'
-
 export function attachDebugger(tabId: number) {
     return new Promise<void>((resolve, reject) => {
         try {
             chrome.debugger.attach({ tabId }, '1.2', async () => {
                 if (chrome.runtime.lastError) {
-                    storageLogger(
-                        `'Failed to attach debugger:', ${chrome.runtime.lastError.message}`,
-                    )
+                    console.log(`'Failed to attach debugger:', ${chrome.runtime.lastError.message}`)
                     reject(
                         new Error(`Failed to attach debugger: ${chrome.runtime.lastError.message}`),
                     )
                 } else {
-                    storageLogger('attached to debugger')
+                    console.log('attached to debugger')
                     await chrome.debugger.sendCommand({ tabId }, 'DOM.enable')
-                    storageLogger('DOM enabled')
+                    console.log('DOM enabled')
                     await chrome.debugger.sendCommand({ tabId }, 'Runtime.enable')
-                    storageLogger('Runtime enabled')
+                    console.log('Runtime enabled')
                     resolve()
                 }
             })
