@@ -2,10 +2,11 @@
 /* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
 import { sleep } from './utils'
 import { downloadAsFile } from './downloader'
+import { useAppState } from '../state/store'
 
-export const takeScreenshot = async (tabId: number, step: number): Promise<void> => {
+export const takeScreenshot = async (step: number): Promise<void> => {
     try {
-        await chrome.tabs.update(tabId, { active: true })
+        const tabId = useAppState.getState().currentTask.tabId
         const loadImage = (dataUrl: string): Promise<HTMLImageElement> =>
             new Promise((resolve, reject) => {
                 const img = new Image()

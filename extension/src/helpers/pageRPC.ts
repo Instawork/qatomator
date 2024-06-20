@@ -2,6 +2,7 @@ import getAnnotatedDOM, { getUniqueElementSelectorId } from '../pages/Content/ge
 import { copyToClipboard } from '../pages/Content/copyToClipboard'
 import ripple from '../pages/Content/ripple'
 import { sleep } from './utils'
+import { useAppState } from '../state/store'
 
 export const rpcMethods = {
     getAnnotatedDOM,
@@ -21,18 +22,12 @@ export const callRPC = async <T extends MethodName>(
     payload?: Payload<T>,
     maxTries = 1,
 ): Promise<MethodRT<T>> => {
-    const URL_PARAMS = new URLSearchParams(window.location.search)
-    let queryOptions: object = { active: true, currentWindow: true }
-    if (URL_PARAMS.has('tab')) {
-        queryOptions = { index: parseInt(<string>URL_PARAMS.get('tab')) }
-    }
-    const activeTab = (await chrome.tabs.query(queryOptions))[0]
-    if (!activeTab?.id) throw new Error('No active tab found')
+    const tabId = useAppState.getState().currentTask.tabId
     /* eslint-disable @typescript-eslint/no-explicit-any */
     let err: any
     for (let i = 0; i < maxTries; i++) {
         try {
-            const response = await chrome.tabs.sendMessage(activeTab.id, {
+            const response = await chrome.tabs.sendMessage(tabId, {
                 type,
                 payload: payload || [],
             })
