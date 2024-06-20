@@ -10,8 +10,8 @@ import { getSimplifiedDom } from '../helpers/simplifyDom'
 import { truthyFilter } from '../helpers/utils'
 import { MyStateCreator, useAppState } from './store'
 import { takeScreenshot } from '../helpers/takeScreenshot'
-import { storageLogger } from '../helpers/chromeStorage'
 import { downloadAsFile } from '../helpers/downloader'
+import { getActiveOrTargetTab } from '../helpers/chromeTabs'
 
 export type TaskHistoryEntry = {
     prompt: string
@@ -46,47 +46,35 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
     actionStatus: 'idle',
     actions: {
         runTask: async (onError) => {
-            const downloadProgress = useAppState.getState().settings.downloadProgress
+            const shouldDownloadProgress = useAppState.getState().settings.downloadProgress
             const wasStopped = () => get().currentTask.status !== 'running'
             const setActionStatus = (status: CurrentTaskSlice['actionStatus']) => {
                 set((state) => {
                     state.currentTask.actionStatus = status
                 })
             }
-
-            const instructions = get().ui.instructions
-
-            if (!instructions || get().currentTask.status === 'running') return
+            const instructions = get().ui.actions.getInstructions()
 
             set((state) => {
                 state.currentTask.instructions = instructions
-                state.currentTask.history = []
                 state.currentTask.status = 'running'
                 state.currentTask.actionStatus = 'attaching-debugger'
             })
 
             try {
-                const URL_PARAMS = new URLSearchParams(window.location.search)
-                let queryOptions: object = { active: true, currentWindow: true }
-                if (URL_PARAMS.has('tab')) {
-                    queryOptions = { index: parseInt(<string>URL_PARAMS.get('tab')) }
-                }
-                const activeTab = (await chrome.tabs.query(queryOptions))[0]
-                if (!activeTab.id) throw new Error('No active tab found')
-
-                const tabId = activeTab.id
+                const activeTab = await getActiveOrTargetTab()
+                const tabId = activeTab.id!
                 set((state) => {
                     state.currentTask.tabId = tabId
                 })
 
-                await storageLogger('Adding debugger and disabling extensions')
                 await attachDebugger(tabId)
                 await disableIncompatibleExtensions()
-                // eslint-disable-next-line no-constant-condition
-                while (true) {
+
+                // todo: Maybe make this limit configurable
+                while (get().currentTask.history.length < 50) {
                     if (wasStopped()) break
 
-                    await storageLogger('pulling dom')
                     setActionStatus('pulling-dom')
                     const pageDOM = await getSimplifiedDom()
                     if (!pageDOM) {
@@ -98,7 +86,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     const html = pageDOM.outerHTML
 
                     if (wasStopped()) break
-                    await storageLogger('transforming dom')
+
                     setActionStatus('transforming-dom')
                     const currentDom = templatize(html)
 
@@ -106,7 +94,6 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         .currentTask.history.map((entry) => entry.action)
                         .filter(truthyFilter)
 
-                    await storageLogger('performing query')
                     setActionStatus('performing-query')
                     const query = await determineNextAction(
                         instructions,
@@ -125,7 +112,6 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                     if (wasStopped()) break
 
-                    await storageLogger('performing action')
                     setActionStatus('performing-action')
                     const action = parseResponse(query.response)
 
@@ -142,8 +128,8 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         break
                     }
 
-                    if (downloadProgress) {
-                        await takeScreenshot(tabId, get().currentTask.history.length)
+                    if (shouldDownloadProgress) {
+                        await takeScreenshot(get().currentTask.history.length)
                         await downloadAsFile(
                             JSON.stringify(get().currentTask),
                             `step-${get().currentTask.history.length}`,
@@ -165,11 +151,6 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     }
 
                     if (wasStopped()) break
-
-                    // todo: Make this configurable
-                    if (get().currentTask.history.length >= 50) {
-                        break
-                    }
 
                     setActionStatus('waiting')
                     const waitForPageLoad = (timeout: number = 10000): Promise<void> => {
