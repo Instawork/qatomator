@@ -10,7 +10,8 @@ import { getSimplifiedDom } from '../helpers/simplifyDom'
 import { truthyFilter } from '../helpers/utils'
 import { MyStateCreator, useAppState } from './store'
 import { takeScreenshot } from '../helpers/takeScreenshot'
-import { readStorageLogger, storageLogger } from '../helpers/chromeStorage'
+import { storageLogger } from '../helpers/chromeStorage'
+import { downloadAsFile } from '../helpers/downloader'
 
 export type TaskHistoryEntry = {
     prompt: string
@@ -142,22 +143,11 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     }
 
                     if (downloadProgress) {
-                        try {
-                            await takeScreenshot(tabId, get().currentTask.history.length)
-                            const key = `step-${get().currentTask.history.length}`
-                            const blob = new Blob([JSON.stringify(get().currentTask)], {
-                                type: 'application/json',
-                            })
-                            const url = URL.createObjectURL(blob)
-                            const a = document.createElement('a')
-                            a.href = url
-                            a.download = `${key}.json`
-                            document.body.appendChild(a)
-                            a.click()
-                            document.body.removeChild(a)
-                        } catch (e) {
-                            console.error(e)
-                        }
+                        await takeScreenshot(tabId, get().currentTask.history.length)
+                        await downloadAsFile(
+                            JSON.stringify(get().currentTask),
+                            `step-${get().currentTask.history.length}`,
+                        )
                     }
 
                     if (
@@ -176,14 +166,13 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                     if (wasStopped()) break
 
-                    // While testing let's automatically stop after 50 actions to avoid
-                    // infinite loops
-                    if (get().currentTask.history.length >= 10) {
+                    // todo: Make this configurable
+                    if (get().currentTask.history.length >= 50) {
                         break
                     }
 
                     setActionStatus('waiting')
-                    const waitForPageLoad = (timeout: number = 60000): Promise<void> => {
+                    const waitForPageLoad = (timeout: number = 10000): Promise<void> => {
                         return new Promise<void>((resolve) => {
                             const checkReadyState = () => {
                                 if (document.readyState === 'complete') {
@@ -229,18 +218,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
             } finally {
                 await detachDebugger(get().currentTask.tabId)
                 await reenableExtensions()
-                await storageLogger(JSON.stringify(get().currentTask, null, 2))
-                const key = `TERMINATE_ME`
-                const blob = new Blob([JSON.stringify(get().currentTask)], {
-                    type: 'application/json',
-                })
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `${key}.json`
-                document.body.appendChild(a)
-                a.click()
-                document.body.removeChild(a)
+                await downloadAsFile(JSON.stringify(get().currentTask), 'TERMINATE_ME.json')
             }
         },
         interrupt: () => {

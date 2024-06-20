@@ -1,6 +1,7 @@
 // todo: check alternatives for following
 /* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
 import { sleep } from './utils'
+import { downloadAsFile } from './downloader'
 
 export const takeScreenshot = async (tabId: number, step: number): Promise<void> => {
     try {
@@ -41,7 +42,7 @@ export const takeScreenshot = async (tabId: number, step: number): Promise<void>
         // Create a canvas to stitch the images together
         const canvas = document.createElement('canvas')
         canvas.width = initialImg.width
-        // todo: This does not give the correct height for some reason. To debug if there is a better way.
+        // todo: This does not give the correct height in local and ci for some reason. To debug if there is a better way.
         const documentHeight = await executeScript(getDocumentHeight, [])
         canvas.height = documentHeight * 3
         const ctx = canvas.getContext('2d')
@@ -62,21 +63,7 @@ export const takeScreenshot = async (tabId: number, step: number): Promise<void>
             ctx.drawImage(img, 0, stitchedHeight, img.width, img.height)
             stitchedHeight += img.height
         }
-
-        const finalDataUrl = canvas.toDataURL('image/png')
-        const blob = await (await fetch(finalDataUrl)).blob()
-        const blobUrl = URL.createObjectURL(blob)
-        // await chrome.downloads.download({
-        //     url: blobUrl,
-        //     filename: `step-${step}.png`,
-        // })
-        // workaround since the above does not seem to respect filename params, a known issue
-        const a = document.createElement('a')
-        a.href = blobUrl
-        a.download = `step-${step}.png`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
+        await downloadAsFile(canvas, `step-${step}.png`)
     } catch (error) {
         console.log(`Error taking screenshot:, ${error}`)
     }
