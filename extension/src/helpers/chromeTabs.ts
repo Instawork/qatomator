@@ -1,4 +1,4 @@
-export const getActiveOrTargetTab = async () => {
+export const getActiveOrTargetTabId = async () => {
     const URL_PARAMS = new URLSearchParams(window.location.search)
     let queryOptions: object = { active: true, currentWindow: true }
     if (URL_PARAMS.has('tab')) {
@@ -6,5 +6,6 @@ export const getActiveOrTargetTab = async () => {
     }
     const activeTab = (await chrome.tabs.query(queryOptions))[0]
     if (!activeTab.id) throw new Error('No active tab found')
-    return activeTab
+    await chrome.tabs.update(activeTab.id, { active: true })
+    return activeTab.id
 }

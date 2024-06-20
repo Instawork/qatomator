@@ -11,7 +11,8 @@ import { truthyFilter } from '../helpers/utils'
 import { MyStateCreator, useAppState } from './store'
 import { takeScreenshot } from '../helpers/takeScreenshot'
 import { downloadAsFile } from '../helpers/downloader'
-import { getActiveOrTargetTab } from '../helpers/chromeTabs'
+import { getActiveOrTargetTabId } from '../helpers/chromeTabs'
+import { waitForPageLoad } from '../helpers/waitForPageLoad'
 
 export type TaskHistoryEntry = {
     prompt: string
@@ -48,7 +49,13 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
         runTask: async (onError) => {
             const shouldDownloadProgress = useAppState.getState().settings.downloadProgress
             const wasStopped = () => get().currentTask.status !== 'running'
+            const setStatus = (status: CurrentTaskSlice['status']) => {
+                set((state) => {
+                    state.currentTask.status = status
+                })
+            }
             const setActionStatus = (status: CurrentTaskSlice['actionStatus']) => {
+                console.log(`Action status: ${status}`)
                 set((state) => {
                     state.currentTask.actionStatus = status
                 })
@@ -62,8 +69,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
             })
 
             try {
-                const activeTab = await getActiveOrTargetTab()
-                const tabId = activeTab.id!
+                const tabId = await getActiveOrTargetTabId()
                 set((state) => {
                     state.currentTask.tabId = tabId
                 })
@@ -73,15 +79,14 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                 // todo: Maybe make this limit configurable
                 while (get().currentTask.history.length < 50) {
-                    if (wasStopped()) break
+                    setActionStatus('waiting')
+                    await waitForPageLoad()
 
                     setActionStatus('pulling-dom')
                     const pageDOM = await getSimplifiedDom()
                     if (!pageDOM) {
-                        set((state) => {
-                            state.currentTask.status = 'error'
-                        })
-                        break
+                        setStatus('error')
+                        throw new Error('Failed to get DOM')
                     }
                     const html = pageDOM.outerHTML
 
@@ -104,10 +109,8 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     )
 
                     if (!query) {
-                        set((state) => {
-                            state.currentTask.status = 'error'
-                        })
-                        break
+                        setStatus('error')
+                        throw new Error(`Failed to determine next action}`)
                     }
 
                     if (wasStopped()) break
@@ -125,14 +128,13 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     })
                     if ('error' in action) {
                         onError(action.error)
-                        break
+                        throw new Error(`Error when Performing Action: ${action.error}`)
                     }
-
                     if (shouldDownloadProgress) {
                         await takeScreenshot(get().currentTask.history.length)
                         await downloadAsFile(
                             JSON.stringify(get().currentTask),
-                            `step-${get().currentTask.history.length}`,
+                            `step-${get().currentTask.history.length}.json`,
                         )
                     }
 
@@ -142,60 +144,19 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         action.parsedAction.name === 'fail'
                     ) {
                         break
-                    }
-
-                    if (action.parsedAction.name === 'click') {
+                    } else if (action.parsedAction.name === 'click') {
                         await callDOMAction('click', action.parsedAction.args)
                     } else if (action.parsedAction.name === 'setValue') {
                         await callDOMAction(action?.parsedAction.name, action?.parsedAction.args)
                     }
 
                     if (wasStopped()) break
-
-                    setActionStatus('waiting')
-                    const waitForPageLoad = (timeout: number = 10000): Promise<void> => {
-                        return new Promise<void>((resolve) => {
-                            const checkReadyState = () => {
-                                if (document.readyState === 'complete') {
-                                    resolve()
-                                } else {
-                                    window.addEventListener('load', handleLoad, { once: true })
-                                }
-                            }
-
-                            const timeoutId = setTimeout(() => {
-                                window.removeEventListener('load', handleLoad)
-                                resolve()
-                            }, timeout)
-
-                            const handleLoad = () => {
-                                clearTimeout(timeoutId)
-                                resolve()
-                            }
-
-                            checkReadyState()
-                        })
-                    }
-
-                    const executeScript = async (func: Function, args: any[]): Promise<any> => {
-                        const [result] = await chrome.scripting.executeScript({
-                            target: { tabId },
-                            // @ts-expect-error
-                            func,
-                            args,
-                        })
-                        return result.result
-                    }
-                    await executeScript(waitForPageLoad, [])
                 }
-                set((state) => {
-                    state.currentTask.status = 'success'
-                })
+                setStatus('success')
             } catch (e) {
                 onError((e as Error).message)
-                set((state) => {
-                    state.currentTask.status = 'error'
-                })
+                console.log((e as Error).message)
+                setStatus('error')
             } finally {
                 await detachDebugger(get().currentTask.tabId)
                 await reenableExtensions()

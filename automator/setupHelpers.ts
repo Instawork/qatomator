@@ -4,6 +4,7 @@ import { Builder, By, Key, logging, WebDriver } from 'selenium-webdriver'
 import chrome from 'selenium-webdriver/chrome'
 import { ChromiumWebDriver } from 'selenium-webdriver/chromium'
 import { config } from './config'
+import CDP from 'chrome-remote-interface'
 
 /**
  * TO ADD
@@ -99,34 +100,30 @@ export const initialiseExtensionAndEnterPrompt = async (driver: WebDriver, promp
  * @param driver
  * @param keepAlive
  */
-// export const trackExtensionLogs = async (driver: WebDriver) => {
-//     const cdpConnection = await driver.createCDPConnection('page')
-//     const client = await CDP({ target: cdpConnection._wsConnection._url })
-//     // const setupListeners = async () => {
-//     client.on('Runtime.consoleAPICalled', async (event) => {
-//         const args = event.args
-//         if (args.length && args[0].value) {
-//             if (['log', 'debug', 'info'].includes(event.type)) {
-//                 extensionLogger.info(JSON.stringify(args[0].value))
-//             } else if (['warning'].includes(event.type)) {
-//                 extensionLogger.warn(JSON.stringify(args[0].value))
-//             } else if (['error'].includes(event.type)) {
-//                 extensionLogger.error(JSON.stringify(args[0].value))
-//             } else {
-//                 extensionLogger.debug(`${event.type}: ${JSON.stringify(args[0].value)}`)
-//             }
-//             if (args[0].value.includes(signals.extensionTerminateSignal)) {
-//                 logger.info('Received task completion signal from extension')
-//                 signals.keepAlive = false
-//             }
-//         }
-//     })
-//     // }
-//     // await setupListeners()
-//     await client.Runtime.enable()
-//     // await client.Page.enable()
-//     // client.on('Page.frameNavigated', async (event) => {
-//     //     logger.info(`Page has navigated to: ${event.frame.url}`)
-//     //     await client.Runtime.enable()
-//     // })
-// }
+export const trackExtensionLogs = async (driver: WebDriver) => {
+    const cdpConnection = await driver.createCDPConnection('page')
+    const client = await CDP({ target: cdpConnection._wsConnection._url })
+    // const setupListeners = async () => {
+    client.on('Runtime.consoleAPICalled', async (event) => {
+        const args = event.args
+        if (args.length && args[0].value) {
+            if (['log', 'debug', 'info'].includes(event.type)) {
+                logger.info(JSON.stringify(args[0].value))
+            } else if (['warning'].includes(event.type)) {
+                logger.warn(JSON.stringify(args[0].value))
+            } else if (['error'].includes(event.type)) {
+                logger.error(JSON.stringify(args[0].value))
+            } else {
+                logger.debug(`${event.type}: ${JSON.stringify(args[0].value)}`)
+            }
+        }
+    })
+    // }
+    // await setupListeners()
+    await client.Runtime.enable()
+    // await client.Page.enable()
+    // client.on('Page.frameNavigated', async (event) => {
+    //     logger.info(`Page has navigated to: ${event.frame.url}`)
+    //     await client.Runtime.enable()
+    // })
+}
