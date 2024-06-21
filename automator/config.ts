@@ -17,8 +17,8 @@ interface Config {
  */
 export const config: Config = {
     openAiKey: process.env.OPENAI_API_KEY || '',
-    maxTimeout: 300000, // 5 minutes
-    targetEnvUrl: process.env.BACKEND_URL ?? 'https://qa.instawork.com',
+    maxTimeout: 600000, // 5 minutes
+    targetEnvUrl: process.env.BACKEND_URL ?? 'https://app.staging2.instawork.com',
     extensionBuildDir: path.resolve(findRoot(__dirname), 'extension/build'),
     artifactsDir: path.resolve(findRoot(__dirname), 'artifacts'),
     downloadsDir: path.resolve(findRoot(__dirname), 'artifacts/downloads'),
