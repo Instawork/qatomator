@@ -12,7 +12,7 @@ export const storageLogger = async (message: string | object, key: storageKeys =
 }
 
 export const readStorageLogger = async (key: storageKeys = 'logs', download = true) => {
-    return chrome.storage.session.get(key, (result) => {
+    return chrome.storage.local.get(key, (result) => {
         const logs = result[key] as string[]
         if (download) {
             const logsString = logs.join('\n')

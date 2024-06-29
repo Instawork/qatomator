@@ -4,8 +4,7 @@ import { logger } from './logger'
 import fs from 'fs'
 
 const prompt =
-    'You are to login with username: by@instawork.com and password 1234. ' +
-    'Then book a shift for next week via "Book Instawork Pros"'
+    'You are to login with username: by@instawork.com and password 1234. Then book a shift for next week via "Book Instawork Pros"'
 
 const navigateAndQatomate = async (prompt: string) => {
     try {

@@ -12,7 +12,8 @@ import { MyStateCreator, useAppState } from './store'
 import { takeScreenshot } from '../helpers/takeScreenshot'
 import { downloadAsFile } from '../helpers/downloader'
 import { getActiveOrTargetTabId } from '../helpers/chromeTabs'
-import { waitForPageLoad } from '../helpers/waitForPageLoad'
+import { waitForTabLoad } from '../helpers/waitForPageLoad'
+import { readStorageLogger, storageLogger } from '../helpers/chromeStorage'
 
 export type TaskHistoryEntry = {
     prompt: string
@@ -55,7 +56,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                 })
             }
             const setActionStatus = (status: CurrentTaskSlice['actionStatus']) => {
-                console.log(`Action status: ${status}`)
+                storageLogger(`Action status: ${status}`)
                 set((state) => {
                     state.currentTask.actionStatus = status
                 })
@@ -64,6 +65,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
             set((state) => {
                 state.currentTask.instructions = instructions
+                state.currentTask.history = []
                 state.currentTask.status = 'running'
                 state.currentTask.actionStatus = 'attaching-debugger'
             })
@@ -80,7 +82,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                 // todo: Maybe make this limit configurable
                 while (get().currentTask.history.length < 50) {
                     setActionStatus('waiting')
-                    await waitForPageLoad()
+                    await waitForTabLoad(tabId)
 
                     setActionStatus('pulling-dom')
                     const pageDOM = await getSimplifiedDom()
@@ -155,12 +157,13 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                 setStatus('success')
             } catch (e) {
                 onError((e as Error).message)
-                console.log((e as Error).message)
+                storageLogger((e as Error).message)
                 setStatus('error')
             } finally {
                 await detachDebugger(get().currentTask.tabId)
                 await reenableExtensions()
                 await downloadAsFile(JSON.stringify(get().currentTask), 'TERMINATE_ME.json')
+                await readStorageLogger()
             }
         },
         interrupt: () => {
