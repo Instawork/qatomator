@@ -5,15 +5,14 @@ import { disableIncompatibleExtensions, reenableExtensions } from '../helpers/ch
 import { callDOMAction } from '../helpers/domActions'
 import { ParsedResponse, ParsedResponseSuccess, parseResponse } from '../helpers/parseResponse'
 import { determineNextAction } from '../helpers/determineNextAction'
-import templatize from '../helpers/templatize'
+import { templatize } from '../helpers/templatize'
 import { getSimplifiedDom } from '../helpers/simplifyDom'
 import { truthyFilter } from '../helpers/utils'
 import { MyStateCreator, useAppState } from './store'
 import { takeScreenshot } from '../helpers/takeScreenshot'
 import { downloadAsFile } from '../helpers/downloader'
 import { getActiveOrTargetTabId } from '../helpers/chromeTabs'
-import { waitForTabLoad } from '../helpers/waitForPageLoad'
-import { readStorageLogger, storageLogger } from '../helpers/chromeStorage'
+import { clearStorageLogger, readStorageLogger, storageLogger } from '../helpers/chromeStorage'
 
 export type TaskHistoryEntry = {
     prompt: string
@@ -48,6 +47,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
     actionStatus: 'idle',
     actions: {
         runTask: async (onError) => {
+            await clearStorageLogger()
             const shouldDownloadProgress = useAppState.getState().settings.downloadProgress
             const wasStopped = () => get().currentTask.status !== 'running'
             const setStatus = (status: CurrentTaskSlice['status']) => {
@@ -82,10 +82,24 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                 // todo: Maybe make this limit configurable
                 while (get().currentTask.history.length < 50) {
                     setActionStatus('waiting')
-                    await waitForTabLoad(tabId)
+                    const sendMessagePromise = (message: any) => {
+                        return new Promise((resolve, reject) => {
+                            chrome.runtime.sendMessage(message, (response) => {
+                                if (chrome.runtime.lastError) {
+                                    reject(new Error(chrome.runtime.lastError.message))
+                                } else if (response.success) {
+                                    resolve(response)
+                                } else {
+                                    reject(new Error(response.error))
+                                }
+                            })
+                        })
+                    }
+                    await sendMessagePromise({ action: 'waitForTabLoad', tabId })
 
                     setActionStatus('pulling-dom')
                     const pageDOM = await getSimplifiedDom()
+                    await storageLogger(JSON.stringify(pageDOM?.outerHTML))
                     if (!pageDOM) {
                         setStatus('error')
                         throw new Error('Failed to get DOM')
@@ -95,7 +109,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     if (wasStopped()) break
 
                     setActionStatus('transforming-dom')
-                    const currentDom = templatize(html)
+                    const currentDom = await templatize(html)
 
                     const previousActions = get()
                         .currentTask.history.map((entry) => entry.action)
@@ -163,7 +177,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                 await detachDebugger(get().currentTask.tabId)
                 await reenableExtensions()
                 await downloadAsFile(JSON.stringify(get().currentTask), 'TERMINATE_ME.json')
-                await readStorageLogger()
+                // await readStorageLogger()
             }
         },
         interrupt: () => {

@@ -246,7 +246,7 @@ function serializeTree(node: JsonNode, templates: Record<string, OptimizedTempla
     }`
 }
 
-export default function templatize(html: string): string {
+export const templatize = async (html: string): Promise<string> => {
     const doc = new DOMParser().parseFromString(html, 'text/html')
     const root = doc.documentElement
 
