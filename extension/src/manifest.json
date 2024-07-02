@@ -16,6 +16,7 @@
     "management",
     "scripting",
     "downloads",
+    "webRequest",
     "webNavigation"
   ],
   "host_permissions": [

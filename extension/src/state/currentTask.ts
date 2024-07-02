@@ -100,7 +100,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
 
                     setActionStatus('pulling-dom')
                     const pageDOM = await getSimplifiedDom()
-                    await storageLogger(JSON.stringify(pageDOM?.outerHTML))
+                    // await storageLogger(JSON.stringify(pageDOM?.outerHTML))
                     if (!pageDOM) {
                         setStatus('error')
                         throw new Error('Failed to get DOM')

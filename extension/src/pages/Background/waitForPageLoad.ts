@@ -1,17 +1,14 @@
 export const waitForPageLoad = async (tabId: number, timeout = 30000) => {
     return new Promise<void>((resolve, reject) => {
-        const onCompleted = (details: chrome.webNavigation.WebNavigationFramedCallbackDetails) => {
+        const activeRequests = new Set<string>()
+        const incrementReq = (details: chrome.webRequest.WebRequestBodyDetails) => {
             if (details.tabId === tabId) {
-                cleanup()
-                resolve()
+                activeRequests.add(details.requestId)
             }
         }
-        const onErrorOccurred = (
-            details: chrome.webNavigation.WebNavigationFramedCallbackDetails,
-        ) => {
+        const decrementReq = (details: chrome.webRequest.WebResponseCacheDetails) => {
             if (details.tabId === tabId) {
-                cleanup()
-                reject(new Error('Page load error occurred'))
+                activeRequests.delete(details.requestId)
             }
         }
         const checkTabStatus = () => {
@@ -21,26 +18,39 @@ export const waitForPageLoad = async (tabId: number, timeout = 30000) => {
                     reject(new Error(chrome.runtime.lastError.message))
                     return
                 }
-                if (tab.status === 'complete') {
+                if (tab.status === 'complete' && activeRequests.size === 0) {
                     cleanup()
                     resolve()
                 }
             })
         }
-        checkTabStatus()
-
         const cleanup = () => {
             clearTimeout(timeoutId)
-            chrome.webNavigation.onCompleted.removeListener(onCompleted)
-            chrome.webNavigation.onErrorOccurred.removeListener(onErrorOccurred)
+            clearInterval(intervalId)
+            chrome.webRequest.onBeforeRequest.removeListener(incrementReq)
+            chrome.webRequest.onCompleted.removeListener(decrementReq)
+            chrome.webRequest.onErrorOccurred.removeListener(decrementReq)
         }
 
         const timeoutId = setTimeout(() => {
+            console.log(`Page did not completely load in ${timeout}. Proceeding regardless.`)
             cleanup()
-            reject(new Error('Page load timed out'))
+            resolve()
         }, timeout)
 
-        chrome.webNavigation.onCompleted.addListener(onCompleted)
-        chrome.webNavigation.onErrorOccurred.addListener(onErrorOccurred)
+        const intervalId = setInterval(checkTabStatus, 1000) // Check tab status every second
+
+        chrome.webRequest.onBeforeRequest.addListener(incrementReq, {
+            urls: ['<all_urls>'],
+            tabId,
+        })
+        chrome.webRequest.onCompleted.addListener(decrementReq, {
+            urls: ['<all_urls>'],
+            tabId,
+        })
+        chrome.webRequest.onErrorOccurred.addListener(decrementReq, {
+            urls: ['<all_urls>'],
+            tabId,
+        })
     })
 }
