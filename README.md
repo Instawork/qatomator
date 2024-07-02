@@ -1,19 +1,29 @@
-### Installing the extension
+<img src="extension/src/assets/img/kool-cat.png" width="64"/>
 
-1. Ensure you have [Node.js](https://nodejs.org/) >= **16**.
-2. Clone this repository
-3. Run `yarn` to install the dependencies
-4. Run `yarn start` to build the package
-5. Load your extension on Chrome by doing the following:
-   1. Navigate to `chrome://extensions/`
-   2. Toggle `Developer mode`
-   3. Click on `Load unpacked extension`
-   4. Select the `build` folder that `yarn start` generated
+### Quickstart
+1. `nvm use`
+2. `yarn` to install the dependencies
+3. `yarn start` to build and run QAtomator in the background
+4. `yarn stop` to kill the webserver running in the background
+----
+
+### Running in CircleCI
+Commit to your branch with a message "qatomate" to trigger the CircleCI pipeline.
 
 ### Running in your browser
 
-1. Once installed, the browser plugin will be available in two forms:
-   1. As a Popup. Activate by pressing `cmd+shift+y` on mac or `ctrl+shift+y` on windows/linux, or by clicking the extension logo in your browser.
-   2. As a devtools panel. Activate by first opening the browser's developer tools, then navigating to the `QAtomator` panel.
-2. The next thing you need to do is create or access an existing [OpenAI API Key](https://platform.openai.com/account/api-keys) and paste it in the provided box. This key will be stored securely in your browser, and will not be uploaded to a third party.
-3. Finally, navigate to a webpage you want QAtomator to act upon (for instance the [OpenAI playground](https://platform.openai.com/playground)) and start experimenting!
+Load your extension on Chrome by doing the following:
+   1. Navigate to `chrome://extensions/`
+   2. Toggle `Developer mode`
+   3. Click on `Load unpacked extension`
+   4. Load the `build` folder in `extensions/build`
+
+Then run your extension as you would any other extensions. 
+
+#### As a popup
+`cmd+shift+y` to open the popup.
+
+Note that you will have to reinitialise it if you navigate away from your current page. 
+
+#### From the devtools panel
+`cmd+shift+c` to open the devtools then navigate to the `QAtomator` panel.
