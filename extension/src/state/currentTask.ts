@@ -82,6 +82,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                 // todo: Maybe make this limit configurable
                 while (get().currentTask.history.length < 50) {
                     setActionStatus('waiting')
+                    // todo: Abstract this out and redo pageRPC to content and background itself
                     const sendMessagePromise = (message: any) => {
                         return new Promise((resolve, reject) => {
                             chrome.runtime.sendMessage(message, (response) => {
