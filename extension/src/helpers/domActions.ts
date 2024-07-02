@@ -120,6 +120,7 @@ async function setValue(payload: { elementId: number; value: string }): Promise<
     const { x, y } = await getCenterCoordinates(objectId)
 
     await selectAllText(x, y)
+    console.log(payload)
     await typeText(payload.value)
     // blur the element
     await blurFocusedElement()

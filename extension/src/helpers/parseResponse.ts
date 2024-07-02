@@ -50,10 +50,16 @@ export function parseResponse(text: string): ParsedResponse {
         }
     }
 
-    const argsArray = actionArgsString
-        .split(',')
-        .map((arg) => arg.trim())
-        .filter((arg) => arg !== '')
+    const splitIndex = actionArgsString.indexOf(',')
+    const argsArray =
+        splitIndex === -1
+            ? [actionArgsString.trim()]
+            : [
+                  actionArgsString.slice(0, splitIndex).trim(),
+                  actionArgsString.slice(splitIndex + 1).trim(),
+              ]
+
+    console.log(argsArray)
     const parsedArgs: Record<string, number | string> = {}
 
     if (argsArray.length !== availableAction.args.length) {

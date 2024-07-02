@@ -35,10 +35,8 @@ export const callRPC = async <T extends MethodName>(
         } catch (e) {
             console.log(e)
             if (i === maxTries - 1) {
-                // Last try, throw the error
                 err = e
             } else {
-                // Content script may not have loaded, retry
                 await sleep(2000)
             }
         }
@@ -61,7 +59,6 @@ export const watchForRPCRequests = () => {
                 resp.then((resolvedResp) => {
                     sendResponse(resolvedResp)
                 })
-
                 return true
             } else {
                 sendResponse(resp)

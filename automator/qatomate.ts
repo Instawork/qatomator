@@ -1,17 +1,17 @@
-import { initialiseExtensionAndEnterPrompt, setupDriver } from './setupHelpers'
+import { initialiseExtensionAndEnterPrompt, setupDriver, trackExtensionLogs } from './setupHelpers'
 import { config } from './config'
 import { logger } from './logger'
 import fs from 'fs'
 
 const prompt =
-    'You are to login with username: Allie_Weber@hotmail.com and password 12345. ' +
-    'Then book a shift for next week via "Book Instawork Pros"'
+    'You are to login with username: by@instawork.com and password 1234. Then book a shift for next week via "Book Instawork Pros"'
 
 const navigateAndQatomate = async (prompt: string) => {
     try {
         const driver = await setupDriver()
         await driver.get(config.targetEnvUrl) // Todo: expand to different entrypoints
         await initialiseExtensionAndEnterPrompt(driver, prompt)
+        await trackExtensionLogs(driver)
 
         fs.watch(config.downloadsDir, (eventType, filename) => {
             if (filename === 'TERMINATE_ME.json') {

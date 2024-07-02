@@ -1,13 +1,12 @@
 import { callRPC } from './pageRPC'
 import { truthyFilter } from './utils'
 
-export async function getSimplifiedDom() {
+export const getSimplifiedDom = async () => {
     const fullDom = await callRPC('getAnnotatedDOM', [], 3)
     if (!fullDom) return null
 
     const dom = new DOMParser().parseFromString(fullDom, 'text/html')
-
-    // Mount the DOM to the document in an iframe so we can use getComputedStyle
+    // Mount the DOM to the document in an iframe, so we can use getComputedStyle
 
     const interactiveElements: HTMLElement[] = []
 
@@ -19,10 +18,10 @@ export async function getSimplifiedDom() {
     return simplifiedDom
 }
 
-function generateSimplifiedDom(
+const generateSimplifiedDom = (
     element: ChildNode,
     interactiveElements: HTMLElement[],
-): ChildNode | null {
+): ChildNode | null => {
     if (element.nodeType === Node.TEXT_NODE && element.textContent?.trim()) {
         return document.createTextNode(element.textContent + ' ')
     }

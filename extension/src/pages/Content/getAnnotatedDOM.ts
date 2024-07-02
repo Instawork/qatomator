@@ -65,7 +65,7 @@ export default function getAnnotatedDOM() {
 }
 
 // idempotent function to get a unique id for an element
-export function getUniqueElementSelectorId(id: number): string {
+export const getUniqueElementSelectorId = (id: number): string => {
     const element = currentElements[id]
     // element may already have a unique id
     let uniqueId = element.getAttribute(QATOMATOR_SELECTOR)

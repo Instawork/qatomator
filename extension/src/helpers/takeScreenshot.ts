@@ -56,7 +56,7 @@ export const takeScreenshot = async (step: number): Promise<void> => {
         while (currentScrollY < documentHeight) {
             currentScrollY += window.innerHeight
             await executeScript(scrollToPosition, [currentScrollY])
-            await sleep(300)
+            await sleep(200)
 
             const dataUrl = await chrome.tabs.captureVisibleTab({ format: 'png' })
             const img = await loadImage(dataUrl)

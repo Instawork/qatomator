@@ -11,8 +11,11 @@ export const storageLogger = async (message: string | object, key: storageKeys =
     console.log(logEntry)
 }
 
+export const clearStorageLogger = async (key: storageKeys = 'logs') => {
+    await chrome.storage.local.remove(key)
+}
 export const readStorageLogger = async (key: storageKeys = 'logs', download = true) => {
-    return chrome.storage.session.get(key, (result) => {
+    return chrome.storage.local.get(key, (result) => {
         const logs = result[key] as string[]
         if (download) {
             const logsString = logs.join('\n')
