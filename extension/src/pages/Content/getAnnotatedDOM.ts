@@ -1,6 +1,6 @@
 import { QATOMATOR_SELECTOR } from '../../constants'
 
-function isInteractive(element: HTMLElement, style: CSSStyleDeclaration): boolean {
+const isInteractive = (element: HTMLElement, style: CSSStyleDeclaration): boolean => {
     return (
         element.tagName === 'A' ||
         element.tagName === 'INPUT' ||
@@ -16,7 +16,7 @@ function isInteractive(element: HTMLElement, style: CSSStyleDeclaration): boolea
     )
 }
 
-function isVisible(element: HTMLElement, style: CSSStyleDeclaration): boolean {
+const isVisible = (element: HTMLElement, style: CSSStyleDeclaration): boolean => {
     return (
         style.opacity !== '' &&
         style.display !== 'none' &&
@@ -28,7 +28,7 @@ function isVisible(element: HTMLElement, style: CSSStyleDeclaration): boolean {
 
 let currentElements: HTMLElement[] = []
 
-function traverseDOM(node: Node, pageElements: HTMLElement[]) {
+const traverseDOM = (node: Node, pageElements: HTMLElement[]) => {
     const clonedNode = node.cloneNode(false) as Node
 
     if (node.nodeType === Node.ELEMENT_NODE) {
@@ -58,7 +58,7 @@ function traverseDOM(node: Node, pageElements: HTMLElement[]) {
  * getAnnotatedDom returns the pageElements array and a cloned DOM
  * with data-pe-idx attributes added to each element in the copy.
  */
-export default function getAnnotatedDOM() {
+export const getAnnotatedDOM = () => {
     currentElements = []
     const result = traverseDOM(document.documentElement, currentElements)
     return (result.clonedDOM as HTMLElement).outerHTML

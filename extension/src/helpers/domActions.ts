@@ -58,7 +58,7 @@ const delayBetweenClicks = 1000 // Set this value to control the delay between c
 const delayBetweenKeystrokes = 100 // Set this value to control typing speed
 
 async function clickAtPosition(x: number, y: number, clickCount = 1): Promise<void> {
-    invokeScriptViaChromeTabs('ripple', [x, y])
+    await invokeScriptViaChromeTabs('ripple', [x, y])
     await sendCommand('Input.dispatchMouseEvent', {
         type: 'mousePressed',
         x,

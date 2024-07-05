@@ -1,5 +1,5 @@
-import getAnnotatedDOM, { getUniqueElementSelectorId } from './pages/Content/getAnnotatedDOM'
-import ripple from './pages/Content/ripple'
+import { getAnnotatedDOM, getUniqueElementSelectorId } from './pages/Content/getAnnotatedDOM'
+import { ripple } from './pages/Content/ripple'
 import { copyToClipboard } from './pages/Content/copyToClipboard'
 import { waitForPageLoad } from './pages/Background/waitForPageLoad'
 
