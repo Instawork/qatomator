@@ -11,6 +11,6 @@ export const ripple = async (x: number, y: number) => {
 
     document.body.appendChild(ripple)
 
-    await sleep(10000)
+    await sleep(1000)
     ripple.remove()
 }
