@@ -59,7 +59,6 @@ export function parseResponse(text: string): ParsedResponse {
                   actionArgsString.slice(splitIndex + 1).trim(),
               ]
 
-    console.log(argsArray)
     const parsedArgs: Record<string, number | string> = {}
 
     if (argsArray.length !== availableAction.args.length) {

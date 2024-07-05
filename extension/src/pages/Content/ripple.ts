@@ -1,6 +1,6 @@
 import { sleep } from '../../helpers/utils'
 
-export default async function ripple(x: number, y: number) {
+export const ripple = async (x: number, y: number) => {
     const rippleRadius = 30
     const ripple = document.createElement('div')
     ripple.classList.add('web-agent-ripple')

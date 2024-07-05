@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { QATOMATOR_SELECTOR } from '../constants'
 import { useAppState } from '../state/store'
-import { callRPC } from './pageRPC'
+import { invokeScriptViaChromeTabs } from './chromeTabs'
 import { sleep } from './utils'
 
 async function sendCommand(method: string, params?: any) {
@@ -10,8 +10,7 @@ async function sendCommand(method: string, params?: any) {
 }
 
 async function getObjectId(originalId: number) {
-    const uniqueId = await callRPC('getUniqueElementSelectorId', [originalId])
-    // get node id
+    const uniqueId = await invokeScriptViaChromeTabs('getUniqueElementSelectorId', [originalId])
     const document = (await sendCommand('DOM.getDocument')) as any
     const { nodeId } = (await sendCommand('DOM.querySelector', {
         nodeId: document.root.nodeId,
@@ -59,7 +58,7 @@ const delayBetweenClicks = 1000 // Set this value to control the delay between c
 const delayBetweenKeystrokes = 100 // Set this value to control typing speed
 
 async function clickAtPosition(x: number, y: number, clickCount = 1): Promise<void> {
-    callRPC('ripple', [x, y])
+    invokeScriptViaChromeTabs('ripple', [x, y])
     await sendCommand('Input.dispatchMouseEvent', {
         type: 'mousePressed',
         x,
