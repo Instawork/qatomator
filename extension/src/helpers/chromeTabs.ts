@@ -29,7 +29,7 @@ export const invokeScriptViaChromeTabs = async <T extends MethodName>(
     type: keyof typeof rpcMethods,
     payload?: Payload<T>,
     maxTries = 1,
-): Promise<MethodRT<T>> => {
+): Promise<MethodRT<T> | void> => {
     const tabId = useAppState.getState().currentTask.tabId
     for (let i = 0; i < maxTries; i++) {
         try {
@@ -39,13 +39,20 @@ export const invokeScriptViaChromeTabs = async <T extends MethodName>(
             })
             return response
         } catch (e) {
-            console.error(e)
-            if (i === maxTries - 1) {
-                throw e
-            } else {
-                await sleep(1000)
+            if (
+                // This is just for visual. Error will be triggered since it returns without "await"
+                type != 'ripple' &&
+                !(<Error>e).message.includes(
+                    'A listener indicated an asynchronous response by returning true, but the message channel closed',
+                )
+            ) {
+                console.error(e)
+                if (i === maxTries - 1) {
+                    throw e
+                } else {
+                    await sleep(1000)
+                }
             }
         }
     }
-    throw Error('Something is horribly wrong if you see this')
 }
