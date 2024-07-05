@@ -1,8 +1,8 @@
-import { callRPC } from './pageRPC'
 import { truthyFilter } from './utils'
+import { invokeScriptViaChromeTabs } from './chromeTabs'
 
 export const getSimplifiedDom = async () => {
-    const fullDom = await callRPC('getAnnotatedDOM', [], 3)
+    const fullDom = await invokeScriptViaChromeTabs('getAnnotatedDOM', [])
     if (!fullDom) return null
 
     const dom = new DOMParser().parseFromString(fullDom, 'text/html')
