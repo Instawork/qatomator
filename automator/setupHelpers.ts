@@ -41,6 +41,8 @@ export const setupDriver = async () => {
         downloadPath: config.downloadsDir,
     })
 
+    await driver.manage().setTimeouts({ implicit: 10000 })
+
     logger.info('Driver setup complete')
     return driver
 }
