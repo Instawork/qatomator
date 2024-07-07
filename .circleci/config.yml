@@ -68,7 +68,7 @@ jobs:
             
             sed -i "s/^STEPS_LIMIT\s*=.*/STEPS_LIMIT=<< pipeline.parameters.steps-limit >>/" extension/.env
             
-            cat << pipeline.parameters.run-qatomate >>
+            echo << pipeline.parameters.run-qatomate >>
             if [[ "$GIT_COMMIT_DESC" =~ "qatomate" ]] || [ << pipeline.parameters.run-qatomate >> == "true" ]
             then
               echo "Initialising extension"
