@@ -74,7 +74,7 @@ export const determineNextAction = async (
     const openAIConfig = new Configuration({
         apiKey: key,
     })
-    // To prevent console-log error
+    // To prevent console-log error from client side
     delete openAIConfig.baseOptions.headers['User-Agent']
     const openai = new OpenAIApi(openAIConfig)
 
