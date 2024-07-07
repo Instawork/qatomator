@@ -22,6 +22,10 @@ parameters:
     type: enum
     default: 'landingPage'
     enum: [ 'landingPage' ]
+  run-qatomate:
+    type: boolean
+    default: false
+    description: "Run QAtomator"
   # Extensions
   steps-limit:
     type: integer
@@ -61,10 +65,11 @@ jobs:
           command: |
             GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
             echo "GIT_COMMIT_DESC=$GIT_COMMIT_DESC"
-            cat extension/.env
+            
             sed -i "s/^STEPS_LIMIT\s*=.*/STEPS_LIMIT=<< pipeline.parameters.steps-limit >>/" extension/.env
-            cat extension/.env
-            if [[ "$GIT_COMMIT_DESC" =~ "qatomate" ]]
+            
+            cat << pipeline.parameters.run-qatomate >>
+            if [[ "$GIT_COMMIT_DESC" =~ "qatomate" ]] || [ << pipeline.parameters.run-qatomate >> == "true" ]
             then
               echo "Initialising extension"
               yarn start
