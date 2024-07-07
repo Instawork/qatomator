@@ -2,6 +2,7 @@ import { Configuration, CreateCompletionResponseUsage, OpenAIApi } from 'openai'
 import { useAppState } from '../state/store'
 import { availableActions } from './availableActions'
 import { ParsedResponseSuccess } from './parseResponse'
+import axios, { AxiosError } from 'axios'
 
 const formattedActions = availableActions
     .map((action, i) => {
@@ -26,71 +27,11 @@ This is an example of an action:
 
 You must always include the <Thought> and <Action> open/close tags or else your response will be marked as invalid.`
 
-export async function determineNextAction(
-    taskInstructions: string,
-    previousActions: ParsedResponseSuccess[],
-    simplifiedDOM: string,
-    maxAttempts = 3,
-    notifyError?: (error: string) => void,
-) {
-    const model = useAppState.getState().settings.selectedModel
-    const prompt = formatPrompt(taskInstructions, previousActions, simplifiedDOM)
-    const key = useAppState.getState().settings.openAIKey
-    if (!key) {
-        notifyError?.('No OpenAI key found')
-        return null
-    }
-
-    const openai = new OpenAIApi(
-        new Configuration({
-            apiKey: key,
-        }),
-    )
-
-    for (let i = 0; i < maxAttempts; i++) {
-        try {
-            const completion = await openai.createChatCompletion({
-                model: model,
-                messages: [
-                    {
-                        role: 'system',
-                        content: systemMessage,
-                    },
-                    { role: 'user', content: prompt },
-                ],
-                max_tokens: 500,
-                temperature: 0,
-                stop: ['</Action>'],
-            })
-
-            return {
-                usage: completion.data.usage as CreateCompletionResponseUsage,
-                prompt,
-                response: completion.data.choices[0].message?.content?.trim() + '</Action>',
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            if (error.response.data.error.message.includes('server error')) {
-                // Problem with the OpenAI API, try again
-                if (notifyError) {
-                    notifyError(error.response.data.error.message)
-                }
-            } else {
-                // Another error, give up
-                throw new Error(error.response.data.error.message)
-            }
-        }
-    }
-    throw new Error(
-        `Failed to complete query after ${maxAttempts} attempts. Please try again later.`,
-    )
-}
-
-export function formatPrompt(
+export const formatPrompt = (
     taskInstructions: string,
     previousActions: ParsedResponseSuccess[],
     pageContents: string,
-) {
+) => {
     let previousActionsString = ''
 
     if (previousActions.length > 0) {
@@ -113,4 +54,63 @@ Current time: ${new Date().toLocaleString()}
 
 Current page contents:
 ${pageContents}`
+}
+
+export const determineNextAction = async (
+    taskInstructions: string,
+    previousActions: ParsedResponseSuccess[],
+    simplifiedDOM: string,
+    maxAttempts = 1,
+    notifyError?: (error: string) => void,
+) => {
+    const model = useAppState.getState().settings.selectedModel
+    const key = useAppState.getState().settings.openAIKey
+    const prompt = formatPrompt(taskInstructions, previousActions, simplifiedDOM)
+    if (!key) {
+        notifyError?.('No OpenAI key found')
+        return null
+    }
+
+    const openAIConfig = new Configuration({
+        apiKey: key,
+    })
+    // To prevent console-log error
+    delete openAIConfig.baseOptions.headers['User-Agent']
+    const openai = new OpenAIApi(openAIConfig)
+
+    for (let i = 0; i < maxAttempts; i++) {
+        try {
+            const completion = await openai.createChatCompletion({
+                model: model,
+                messages: [
+                    {
+                        role: 'system',
+                        content: systemMessage,
+                    },
+                    { role: 'user', content: prompt },
+                ],
+                max_tokens: 500,
+                temperature: 0,
+                stop: ['</Action>'],
+            })
+
+            return {
+                usage: completion.data.usage as CreateCompletionResponseUsage,
+                prompt,
+                response: completion.data.choices[0].message?.content?.trim() + '</Action>',
+            }
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const errorMessage = error.response?.data?.error?.message || 'Unknown error'
+                if (errorMessage.includes('server error')) {
+                    notifyError?.(errorMessage)
+                } else {
+                    throw new Error(errorMessage)
+                }
+            } else {
+                throw error
+            }
+        }
+    }
+    throw new Error(`Failed to complete query after ${maxAttempts} attempts.`)
 }
