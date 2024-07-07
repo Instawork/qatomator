@@ -22,6 +22,11 @@ parameters:
     type: enum
     default: 'landingPage'
     enum: [ 'landingPage' ]
+  # Extensions
+  steps-limit:
+    type: integer
+    default: 50
+    description: "Number of steps to run in QAtomator"
 
 
 jobs:
@@ -56,6 +61,9 @@ jobs:
           command: |
             GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
             echo "GIT_COMMIT_DESC=$GIT_COMMIT_DESC"
+            cat extension/.env
+            sed -i "s/^STEPS_LIMIT=.*/${{ parameters.steps-limit }}/g" extension/.env
+            cat extension/.env
             if [[ "$GIT_COMMIT_DESC" =~ "qatomate" ]]
             then
               echo "Initialising extension"

@@ -80,7 +80,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                 await disableIncompatibleExtensions()
 
                 // todo: Maybe make this limit configurable
-                while (get().currentTask.history.length < 50) {
+                while (get().currentTask.history.length < Number(process.env.STEPS_LIMIT)) {
                     setActionStatus('waiting')
                     // todo: Abstract this out and redo pageRPC to content and background itself
                     const sendMessagePromise = (message: any) => {
