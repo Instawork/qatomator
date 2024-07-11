@@ -1,7 +1,7 @@
 // todo: check alternatives for following
 /* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
 import { sleep } from './utils'
-import { downloadAsFile } from './downloader'
+import { downloadAsFile } from './chromeDownloads'
 import { useAppState } from '../state/store'
 
 export const takeScreenshot = async (step: number): Promise<void> => {

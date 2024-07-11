@@ -10,7 +10,7 @@ import { getSimplifiedDom } from '../helpers/simplifyDom'
 import { truthyFilter } from '../helpers/utils'
 import { MyStateCreator, useAppState } from './store'
 import { takeScreenshot } from '../helpers/takeScreenshot'
-import { downloadAsFile } from '../helpers/downloader'
+import { downloadAsFile } from '../helpers/chromeDownloads'
 import { getActiveOrTargetTabId } from '../helpers/chromeTabs'
 import { clearStorageLogger, readStorageLogger, storageLogger } from '../helpers/chromeStorage'
 
