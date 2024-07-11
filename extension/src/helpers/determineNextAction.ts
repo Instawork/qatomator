@@ -2,7 +2,7 @@ import { Configuration, CreateCompletionResponseUsage, OpenAIApi } from 'openai'
 import { useAppState } from '../state/store'
 import { availableActions } from './availableActions'
 import { ParsedResponseSuccess } from './parseResponse'
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
 
 const formattedActions = availableActions
     .map((action, i) => {
