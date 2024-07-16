@@ -4,7 +4,7 @@ import { logger } from './logger'
 import fs from 'fs'
 
 const prompt =
-    "You are a business partner on the Instawork platform. You are to login with username: jchu+partner@instawork.com and password 1234567890 first. Then, you need to book a General Labour Pro. Booking form has an entry point from 'Book New Shifts' button on the dashboard followed by 'Book new shift'.\n" +
+    "You are a business partner on the Instawork platform. You are to login with username: jchu+partner@instawork.com and password 1234567890 first. Then, you need to book a General Labour Pro. Booking form has an entry point from 'Book New Shifts' button on the dashboard followed by 'Book new shift'." +
     'It is important to remember these while performing actions and navigating.' +
     'Handle Error States - If any errors are indicated, and cannot navigate to next step, resolve them by providing the correct inputs.' +
     'Ensure that no actions and clicks to be performed on disabled CTAs and Left navigation panel.' +
