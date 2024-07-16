@@ -87,6 +87,13 @@ export const initialiseExtensionAndEnterPrompt = async (driver: WebDriver, promp
         .findElement(By.css('[data-testid="openai-api-key-input"]'))
         .sendKeys(config.openAiKey)
     await driver.findElement(By.css('[data-testid="save-key-button"]')).click()
+
+    const lines = prompt.trim().split('\n')
+    for (const line of lines) {
+        await driver
+            .findElement(By.css('[data-testid="main-task-prompt"]'))
+            .sendKeys(line, Key.chord(Key.SHIFT, Key.RETURN))
+    }
     await driver
         .findElement(By.css('[data-testid="main-task-prompt"]'))
         .sendKeys(prompt, Key.RETURN)
