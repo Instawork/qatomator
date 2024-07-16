@@ -14,7 +14,7 @@ import CDP from 'chrome-remote-interface'
  */
 export const setupDriver = async () => {
     const options = new chrome.Options()
-        .addArguments('--headless=new')
+        // .addArguments('--headless=new')
         .addArguments('--disable-gpu')
         .addArguments('--no-sandbox')
         .addArguments('--disable-dev-shm-usage')
@@ -94,9 +94,7 @@ export const initialiseExtensionAndEnterPrompt = async (driver: WebDriver, promp
             .findElement(By.css('[data-testid="main-task-prompt"]'))
             .sendKeys(line, Key.chord(Key.SHIFT, Key.RETURN))
     }
-    await driver
-        .findElement(By.css('[data-testid="main-task-prompt"]'))
-        .sendKeys(prompt, Key.RETURN)
+    await driver.findElement(By.css('[data-testid="main-task-prompt"]')).sendKeys(Key.RETURN)
     await driver.switchTo().window(windows[0])
 
     logger.info('Extension initialised, prompt entered, QAtomator taking over.')
