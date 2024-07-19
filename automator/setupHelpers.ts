@@ -7,10 +7,9 @@ import { config } from './config'
 import CDP from 'chrome-remote-interface'
 
 /**
- * TO ADD
+ * Sets up the Selenium WebDriver with the required Chrome options and configurations.
  *
- * @param   whatsit  The whatsit to use (or whatever).
- * @returns A useful value.
+ * @returns {Promise<WebDriver>} A promise that resolves to the configured WebDriver instance.
  */
 export const setupDriver = async () => {
     const options = new chrome.Options()
@@ -48,10 +47,11 @@ export const setupDriver = async () => {
 }
 
 /**
- * TO ADD
+ * Initializes the Chrome extension and enters the given prompt into the extension's interface.
  *
- * @param   whatsit  The whatsit to use (or whatever).
- * @returns A useful value.
+ * @param {WebDriver} driver - The WebDriver instance to use.
+ * @param {string} prompt - The prompt to enter into the extension.
+ * @returns {Promise<void>} A promise that resolves when the extension is initialized and the prompt is entered.
  */
 export const initialiseExtensionAndEnterPrompt = async (driver: WebDriver, prompt: string) => {
     const getExtensionUrl = async (attempts: number, maxRetries: number = 3): Promise<string> => {
@@ -101,11 +101,10 @@ export const initialiseExtensionAndEnterPrompt = async (driver: WebDriver, promp
 }
 
 /**
- * TO ADD
+ * Tracks logs from the Chrome extension using the Chrome DevTools Protocol (CDP).
  *
- * @returns A useful value.
- * @param driver
- * @param keepAlive
+ * @param {WebDriver} driver - The WebDriver instance to use.
+ * @returns {Promise<void>} A promise that resolves when the CDP connection is established and log tracking is set up.
  */
 export const trackExtensionLogs = async (driver: WebDriver) => {
     const cdpConnection = await driver.createCDPConnection('page')

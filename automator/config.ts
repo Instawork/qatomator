@@ -13,7 +13,15 @@ interface Config {
 }
 
 /**
- * TO ADD
+ * Configuration object containing various settings and directory paths used in the application.
+ *
+ * @type {Config}
+ * @property {string} openAiKey - The API key for OpenAI, sourced from the environment variable OPENAI_API_KEY.
+ * @property {number} maxTimeout - The maximum timeout value for operations, set to 450000 milliseconds (7.5 minutes).
+ * @property {string} targetEnvUrl - The target environment URL, sourced from the environment variable BACKEND_URL or set to a default value.
+ * @property {string} extensionBuildDir - The directory path for the extension build, resolved relative to the project root.
+ * @property {string} artifactsDir - The directory path for artifacts, resolved relative to the project root.
+ * @property {string} downloadsDir - The directory path for downloads, resolved relative to the artifacts directory.
  */
 export const config: Config = {
     openAiKey: process.env.OPENAI_API_KEY || '',
