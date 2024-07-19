@@ -25,6 +25,7 @@ const ModelDropdown = () => {
             <option value="gpt-4">GPT-4</option>
             <option value="gpt-4-1106-preview">GPT-4 Turbo</option>
             <option value="gpt-4o">GPT-4 Omni</option>
+            <option value="gpt-4o-mini">GPT-4 Omni Mini</option>
         </Select>
     )
 }

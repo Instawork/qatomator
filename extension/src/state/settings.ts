@@ -11,7 +11,7 @@ export type SettingsSlice = {
 export const createSettingsSlice: MyStateCreator<SettingsSlice> = (set) => ({
     openAIKey: process.env.OPENAI_API_KEY ?? null,
     downloadProgress: true,
-    selectedModel: 'gpt-4o',
+    selectedModel: 'gpt-4o-mini',
     actions: {
         update: (values) => {
             set((state) => {
