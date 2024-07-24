@@ -12,9 +12,9 @@ export type ParsedResponse =
           error: string
       }
 
-export function parseResponse(text: string): ParsedResponse {
-    const thoughtMatch = text.match(/<Thought>(.*?)<\/Thought>/)
-    const actionMatch = text.match(/<Action>(.*?)<\/Action>/)
+export function parseResponse(resp: string): ParsedResponse {
+    const thoughtMatch = resp.match(/<Thought>(.*?)<\/Thought>/)
+    const actionMatch = resp.match(/<Action>(.*?)<\/Action>/)
 
     if (!thoughtMatch) {
         return {
@@ -53,12 +53,13 @@ export function parseResponse(text: string): ParsedResponse {
     const splitIndex = actionArgsString.indexOf(',')
     const argsArray =
         splitIndex === -1
-            ? [actionArgsString.trim()]
+            ? actionArgsString != ''
+                ? [actionArgsString.trim()]
+                : []
             : [
                   actionArgsString.slice(0, splitIndex).trim(),
                   actionArgsString.slice(splitIndex + 1).trim(),
               ]
-
     const parsedArgs: Record<string, number | string> = {}
 
     if (argsArray.length !== availableAction.args.length) {
