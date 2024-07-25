@@ -24,12 +24,6 @@ export const availableActions = [
         ],
     },
     {
-        name: 'assess',
-        description:
-            'Assesses and determine whether the current state is as expected based on past actions taken and current DOM',
-        args: [],
-    },
-    {
         name: 'finish',
         description: 'Indicates the task is finished',
         args: [],
