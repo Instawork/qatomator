@@ -8,7 +8,9 @@ export const waitForPageLoad = async (tabId: number, timeout = 30000) => {
         }
         const decrementReq = (details: chrome.webRequest.WebResponseCacheDetails) => {
             if (details.tabId === tabId) {
-                activeRequests.delete(details.requestId)
+                setTimeout(() => {
+                    activeRequests.delete(details.requestId)
+                }, 1000) // Delay to ensure retried network calls are captured too
             }
         }
         const checkTabStatus = () => {

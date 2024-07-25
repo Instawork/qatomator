@@ -7,14 +7,12 @@ export const getSimplifiedDom = async () => {
 
     const dom = new DOMParser().parseFromString(fullDom, 'text/html')
     // Mount the DOM to the document in an iframe, so we can use getComputedStyle
-
     const interactiveElements: HTMLElement[] = []
 
     const simplifiedDom = generateSimplifiedDom(
         dom.documentElement,
         interactiveElements,
     ) as HTMLElement
-
     return simplifiedDom
 }
 
@@ -41,7 +39,8 @@ const generateSimplifiedDom = (
     const interactive =
         element.getAttribute('data-interactive') === 'true' || element.hasAttribute('role')
     const hasLabel = element.hasAttribute('aria-label') || element.hasAttribute('name')
-    const includeNode = interactive || hasLabel
+    const loadingCheck = element.classList.contains('spinner-border')
+    const includeNode = interactive || hasLabel || loadingCheck
 
     if (!includeNode && children.length === 0) return null
     if (!includeNode && children.length === 1) {
@@ -62,6 +61,9 @@ const generateSimplifiedDom = (
     ]
 
     for (const attr of allowedAttributes) {
+        if (loadingCheck) {
+            container.setAttribute('still-loading', 'you-spin-my-head-right-round-right-round')
+        }
         if (element.hasAttribute(attr)) {
             container.setAttribute(attr, element.getAttribute(attr) as string)
         }

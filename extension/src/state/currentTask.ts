@@ -107,6 +107,12 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     }
                     const html = pageDOM.outerHTML
 
+                    // Rerun flow from start if some components are still loading
+                    if (html.includes('still-loading')) {
+                        await new Promise((resolve) => setTimeout(resolve, 1000))
+                        continue
+                    }
+
                     if (wasStopped()) break
 
                     setActionStatus('transforming-dom')
