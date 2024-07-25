@@ -2,17 +2,20 @@ import { QATOMATOR_SELECTOR } from '../../constants'
 
 const isInteractive = (element: HTMLElement, style: CSSStyleDeclaration): boolean => {
     return (
-        element.tagName === 'A' ||
-        element.tagName === 'INPUT' ||
-        element.tagName === 'BUTTON' ||
-        element.tagName === 'SELECT' ||
-        element.tagName === 'TEXTAREA' ||
-        element.hasAttribute('onclick') ||
-        element.hasAttribute('onmousedown') ||
-        element.hasAttribute('onmouseup') ||
-        element.hasAttribute('onkeydown') ||
-        element.hasAttribute('onkeyup') ||
-        style.cursor === 'pointer'
+        (element.tagName === 'A' ||
+            element.tagName === 'INPUT' ||
+            element.tagName === 'BUTTON' ||
+            element.tagName === 'SELECT' ||
+            element.tagName === 'TEXTAREA' ||
+            element.hasAttribute('onclick') ||
+            element.hasAttribute('onmousedown') ||
+            element.hasAttribute('onmouseup') ||
+            element.hasAttribute('onkeydown') ||
+            element.hasAttribute('onkeyup') ||
+            style.cursor === 'pointer') &&
+        (!element.getAttribute('disabled') ||
+            element.classList.contains('disabled') ||
+            style.cursor === 'not-allowed')
     )
 }
 

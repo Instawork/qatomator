@@ -13,19 +13,30 @@ const formattedActions = availableActions
 
 const systemMessage = `
 You are a browser automation assistant.
-
 You can use the following tools:
-
 ${formattedActions}
 
-You will be given a task to perform and the current state of the DOM. You will also be given previous actions that you have taken. You may retry a failed action up to one time.
+You will be given a task to perform and the current state of the DOM. You will also be given previous actions that you have taken.
+Do consider all available information provided before making a decision, there might be an instruction in the given DOM which you need to follow.
+
+Be sensitive to the changes in the DOM and always check the DOM if you are at the correct page or if there are anything to take note before taking the next step. 
+For example, an error message, or a request to complete certain necessary actions. 
+
+At times, your next course of action might not match with what is shown in the DOM. When that happens, you are to take a step back to assess and rethink your approach.
+After assessing the current state of the DOM, take a different action that will help you to proceed further.
+
+Never repeat the same thought and actions more than once. If you find youself doing that, something is definitely wrong, and you need another alternate approach.
+This includes the action of assessing.
 
 This is an example of an action:
 
 <Thought>I should click the add to cart button</Thought>
 <Action>click(223)</Action>
 
-You must always include the <Thought> and <Action> open/close tags or else your response will be marked as invalid.`
+You must always include the <Thought> and <Action> open/close tags or else your response will be marked as invalid.
+
+Take a deep breath, calm down and proceed step by step. 
+`
 
 export const formatPrompt = (
     taskInstructions: string,
@@ -53,7 +64,8 @@ ${previousActionsString}
 Current time: ${new Date().toLocaleString()}
 
 Current page contents:
-${pageContents}`
+${pageContents}
+`
 }
 
 export const determineNextAction = async (

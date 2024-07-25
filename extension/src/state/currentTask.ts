@@ -12,7 +12,7 @@ import { MyStateCreator, useAppState } from './store'
 import { takeScreenshot } from '../helpers/takeScreenshot'
 import { downloadAsFile } from '../helpers/chromeDownloads'
 import { getActiveOrTargetTabId } from '../helpers/chromeTabs'
-import { clearStorageLogger, readStorageLogger, storageLogger } from '../helpers/chromeStorage'
+import { clearStorageLogger, storageLogger } from '../helpers/chromeStorage'
 
 export type TaskHistoryEntry = {
     prompt: string
@@ -110,7 +110,8 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     if (wasStopped()) break
 
                     setActionStatus('transforming-dom')
-                    const currentDom = await templatize(html)
+                    // This seems to over-process the already simplified dom. Using that directly for now.
+                    // const currentDom = await templatize(html)
 
                     const previousActions = get()
                         .currentTask.history.map((entry) => entry.action)
@@ -120,7 +121,7 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                     const query = await determineNextAction(
                         instructions,
                         previousActions.filter((pa) => !('error' in pa)) as ParsedResponseSuccess[],
-                        currentDom,
+                        html,
                         3,
                         onError,
                     )
