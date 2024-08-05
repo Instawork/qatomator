@@ -5,7 +5,6 @@ import { disableIncompatibleExtensions, reenableExtensions } from '../helpers/ch
 import { callDOMAction } from '../helpers/domActions'
 import { ParsedResponse, ParsedResponseSuccess, parseResponse } from '../helpers/parseResponse'
 import { determineNextAction } from '../helpers/determineNextAction'
-import { templatize } from '../helpers/templatize'
 import { getSimplifiedDom } from '../helpers/simplifyDom'
 import { truthyFilter } from '../helpers/utils'
 import { MyStateCreator, useAppState } from './store'
@@ -154,12 +153,14 @@ export const createCurrentTaskSlice: MyStateCreator<CurrentTaskSlice> = (set, ge
                         onError(action.error)
                         throw new Error(`Error when Performing Action: ${action.error}`)
                     }
+
                     if (shouldDownloadProgress) {
-                        await takeScreenshot(get().currentTask.history.length)
-                        await downloadAsFile(
-                            JSON.stringify(get().currentTask),
-                            `step-${get().currentTask.history.length}.json`,
-                        )
+                        let filename = `step-${get().currentTask.history.length}`
+                        if (action.errorMsg) {
+                            filename = `${filename}-error`
+                        }
+                        await takeScreenshot(filename)
+                        await downloadAsFile(JSON.stringify(get().currentTask), `${filename}.json`)
                     }
 
                     if (

@@ -4,6 +4,7 @@ export type ParsedResponseSuccess = {
     thought: string
     action: string
     parsedAction: ActionPayload
+    errorMsg: string
 }
 
 export type ParsedResponse =
@@ -15,6 +16,13 @@ export type ParsedResponse =
 export function parseResponse(resp: string): ParsedResponse {
     const thoughtMatch = resp.match(/<Thought>(.*?)<\/Thought>/)
     const actionMatch = resp.match(/<Action>(.*?)<\/Action>/)
+    const errorMatch = resp.match(/<Error>(.*?)<\/Error>/)
+
+    let errResp = ''
+    if (errorMatch && errorMatch[1].trim() !== '' && errorMatch[1].trim() !== 'None') {
+        errResp = errorMatch[1]
+        console.log('Error found:', errResp)
+    }
 
     if (!thoughtMatch) {
         return {
@@ -111,8 +119,9 @@ export function parseResponse(resp: string): ParsedResponse {
     } as ActionPayload
 
     return {
-        thought,
+        thought: thought,
         action: actionString,
-        parsedAction,
+        parsedAction: parsedAction,
+        errorMsg: errResp,
     }
 }

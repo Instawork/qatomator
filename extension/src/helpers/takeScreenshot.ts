@@ -4,7 +4,7 @@ import { sleep } from './utils'
 import { downloadAsFile } from './chromeDownloads'
 import { useAppState } from '../state/store'
 
-export const takeScreenshot = async (step: number): Promise<void> => {
+export const takeScreenshot = async (filename: string): Promise<void> => {
     try {
         const tabId = useAppState.getState().currentTask.tabId
         const loadImage = (dataUrl: string): Promise<HTMLImageElement> =>
@@ -64,7 +64,8 @@ export const takeScreenshot = async (step: number): Promise<void> => {
             ctx.drawImage(img, 0, stitchedHeight, img.width, img.height)
             stitchedHeight += img.height
         }
-        await downloadAsFile(canvas, `step-${step}.png`)
+
+        await downloadAsFile(canvas, `${filename}.png`)
     } catch (error) {
         console.log(`Error taking screenshot:, ${error}`)
     }
