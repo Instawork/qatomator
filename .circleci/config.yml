@@ -82,11 +82,12 @@ jobs:
             echo "STARTING"
             echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-1 >>" ]; then
-              PROMPT="$PROMPT<< pipeline.parameters.prompt-part-1 >>"
+              PROMPT="<< pipeline.parameters.prompt-part-1 >>"
             fi
             echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-2 >>" ]; then
-              PROMPT="$PROMPT\n<< pipeline.parameters.prompt-part-2 >>"
+            addon="<< pipeline.parameters.prompt-part-2 >>"
+              PROMPT="$PROMPT1$addon"
             fi
             echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-3 >>" ]; then
