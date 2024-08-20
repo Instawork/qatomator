@@ -86,12 +86,13 @@ jobs:
             fi
             echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-2 >>" ]; then
-            addon="<< pipeline.parameters.prompt-part-2 >>"
+              addon="<< pipeline.parameters.prompt-part-2 >>"
               PROMPT="$PROMPT$addon"
             fi
             echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-3 >>" ]; then
-              PROMPT="$PROMPT<< pipeline.parameters.prompt-part-3 >>"
+              addon="<< pipeline.parameters.prompt-part-3 >>"
+              PROMPT="$PROMPT$addon"
             fi
             echo "Combined Prompt: $PROMPT"
       - run:
