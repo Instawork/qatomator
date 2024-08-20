@@ -76,12 +76,19 @@ jobs:
           name: Combine Prompt Parts and Replace Variable
           command: |
             PROMPT=""
+            echo << pipeline.parameters.prompt-part-1 >>
+            echo << pipeline.parameters.prompt-part-2 >>
+            echo << pipeline.parameters.prompt-part-3 >>
+            echo "STARTING"
+            echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-1 >>" ]; then
               PROMPT="$PROMPT<< pipeline.parameters.prompt-part-1 >>"
             fi
+            echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-2 >>" ]; then
               PROMPT="$PROMPT\n<< pipeline.parameters.prompt-part-2 >>"
             fi
+            echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-3 >>" ]; then
               PROMPT="$PROMPT<< pipeline.parameters.prompt-part-3 >>"
             fi
