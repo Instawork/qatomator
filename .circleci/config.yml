@@ -87,7 +87,7 @@ jobs:
             echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-2 >>" ]; then
             addon="<< pipeline.parameters.prompt-part-2 >>"
-              PROMPT="$PROMPT1$addon"
+              PROMPT="$PROMPT$addon"
             fi
             echo $PROMPT
             if [ ! -z "<< pipeline.parameters.prompt-part-3 >>" ]; then
