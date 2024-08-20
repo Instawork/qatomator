@@ -31,6 +31,18 @@ parameters:
     type: integer
     default: 50
     description: "Number of steps to run in QAtomator"
+  prompt-part-1:
+    type: string
+    default: ""
+    description: "Your prompt to QAtomator in parts - 1"
+  prompt-part-2:
+    type: string
+    default: ""
+    description: "Your prompt to QAtomator in parts - 2"
+  prompt-part-3:
+    type: string
+    default: ""
+    description: "Your prompt to QAtomator in parts - 3"
 
 
 jobs:
@@ -60,6 +72,20 @@ jobs:
           paths:
             - node_modules
           key: node-modules-{{ checksum "yarn.lock" }}
+      - run:
+          name: Combine Prompt Parts and Replace Variable
+          command: |
+            PROMPT=""
+            if [ ! -z "<< pipeline.parameters.prompt-part-1 >>" ]; then
+              PROMPT="$PROMPT<< pipeline.parameters.prompt-part-1 >>"
+            fi
+            if [ ! -z "<< pipeline.parameters.prompt-part-2 >>" ]; then
+              PROMPT="$PROMPT\n<< pipeline.parameters.prompt-part-2 >>"
+            fi
+            if [ ! -z "<< pipeline.parameters.prompt-part-3 >>" ]; then
+              PROMPT="$PROMPT<< pipeline.parameters.prompt-part-3 >>"
+            fi
+            echo "Combined Prompt: $PROMPT"
       - run:
           name: Running QAtomator
           command: |
