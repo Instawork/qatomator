@@ -95,6 +95,8 @@ jobs:
               PROMPT="$PROMPT$addon"
             fi
             echo "Combined Prompt: $PROMPT"
+            sed -i "s/prompt\s*=\s*defaultPrompt/prompt=$PROMPT/" automator/qatomate.ts
+            cat automator/qatomate.ts
       - run:
           name: Running QAtomator
           command: |

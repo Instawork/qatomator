@@ -1,3 +1,9 @@
+export const defaultPrompt = `You are a business partner on the Instawork platform. You are to login with username: jchu+partner@instawork.com and password 1234567890 first. Then, you need to book a General Labour Pro. Booking form has an entry point from 'Book New Shifts' button on the dashboard followed by 'Book new shift'.
+When navigating the booking form, take note of the following which you may or may not be needed:
+- The booking form has the following steps in order: Schedule, Staff, Hourly rate and Confirm.
+- Click "Done" after you have selected your dates in the date picker
+Consider your task finished on completing the booking.`
+
 export const shortTermBookingFormTestPrompt = `
 Assume you are a QA engineer for the Instawork platform. You need to test the partner dashboard manually. The booking form is a crucial part of this process, with an entry point from the 'Book Instawork Pros' button on the dashboard.
 
