@@ -2,13 +2,9 @@ import { initialiseExtensionAndEnterPrompt, setupDriver, trackExtensionLogs } fr
 import { config } from './config'
 import { logger } from './logger'
 import fs from 'fs'
+import { defaultPrompt } from './promptLibrary/prompts'
 
-const prompt =
-    "You are a business partner on the Instawork platform. You are to login with username: jchu+partner@instawork.com and password 1234567890 first. Then, you need to book a General Labour Pro. Booking form has an entry point from 'Book New Shifts' button on the dashboard followed by 'Book new shift'.\n" +
-    'When navigating the booking form, take note of the following which you may or may not be needed:\n' +
-    '- The booking form has the following steps in order: Schedule, Staff, Hourly rate and Confirm.\n' +
-    '- Click "Done" after you have selected your dates in the date picker\n' +
-    'Consider your task finished on completing the booking. '
+const prompt = defaultPrompt
 
 const navigateAndQatomate = async (prompt: string) => {
     try {
