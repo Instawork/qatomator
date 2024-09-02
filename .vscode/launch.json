@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // This configuration is used to launch qatomate from the VSCode debugger
+            "type": "node",
+            "request": "launch",
+            "name": "Launch qatomate",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "ts-node"
+            ],
+            "args": [
+                "automator/qatomate.ts"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ]
+        },
+        {
+            // This configuration is used to attach to the running qatomate process if it is executed from the terminal with the --inspect flag
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to qatomate",
+            "restart": true,
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "autoAttachChildProcesses": true
+        }
+    ]
+}

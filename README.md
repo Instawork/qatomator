@@ -20,6 +20,19 @@ Load your extension on Chrome by doing the following:
 
 Then run your extension as you would any other extensions. 
 
+### Running via VSCode debugger
+- Click on the `Run and Debug` icon on the left sidebar
+- From the dropdown, select `Launch qatomate`
+- Click on the green play button to run the debugger
+- Note: This uses the settings in `.vscode/launch.json` to run the debugger.
+
+### Running via command line
+- Inspect mode used for debugging
+  - `yarn node --inspect -r ts-node/register automator/qatomate.ts`
+  - This uses the file `.vscode/launch.json` to run the debugger.
+- Normal mode
+  - `yarn ts-node automator/qatomate.ts`
+
 #### As a popup
 `cmd+shift+y` to open the popup.
 

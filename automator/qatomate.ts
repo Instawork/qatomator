@@ -2,14 +2,21 @@ import { initialiseExtensionAndEnterPrompt, setupDriver, trackExtensionLogs } fr
 import { config } from './config'
 import { logger } from './logger'
 import fs from 'fs'
-import { defaultPrompt } from './promptLibrary/prompts'
+import { loginPrompt } from './promptLibrary/prompts'
+import { createRecorder } from './videoRecorder'
 
-const prompt = defaultPrompt
+const prompt = loginPrompt
 
 const navigateAndQatomate = async (prompt: string) => {
     try {
+        const recorder = createRecorder({
+            outputPath: `${config.artifactsDir}/qatomator-screen-recording.mp4`,
+        })
         const driver = await setupDriver()
-        await driver.get(config.targetEnvUrl) // Todo: expand to different entrypoints
+        recorder.start()
+        logger.info(`Navigating to ${config.targetEnvUrl}`)
+        await driver.get(config.targetEnvUrl)
+        // Todo: expand to different entrypoints
         await initialiseExtensionAndEnterPrompt(driver, prompt)
         await trackExtensionLogs(driver)
 
@@ -17,6 +24,7 @@ const navigateAndQatomate = async (prompt: string) => {
             if (filename === 'TERMINATE_ME.json') {
                 logger.info('Received TERMINATE_ME.json. Stopping run')
                 driver.quit()
+                recorder.stop()
                 process.exit(0)
             }
         })
@@ -30,4 +38,15 @@ const navigateAndQatomate = async (prompt: string) => {
     }
 }
 
+// If an uncaught exception or unhandled rejection occurs, log the error and exit the process.
+// This will help in debugging issues that may occur in child processes.
+process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception:', error)
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Rejection at:', promise, 'reason:', reason)
+})
+
+// Start the automation process.
 navigateAndQatomate(prompt)
