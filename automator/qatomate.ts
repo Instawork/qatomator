@@ -22,10 +22,11 @@ const navigateAndQatomate = async (prompt: string) => {
 
         fs.watch(config.downloadsDir, (eventType, filename) => {
             if (filename === 'TERMINATE_ME.json') {
-                logger.info('Received TERMINATE_ME.json. Stopping run')
+                logger.info('Received TERMINATE_ME.json. Will stop the run after 5 seconds ...')
                 driver.quit()
-                recorder.stop()
-                process.exit(0)
+                recorder.stop().then(() => {
+                    process.exit(0)
+                })
             }
         })
         setTimeout(async () => {

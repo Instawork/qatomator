@@ -98,6 +98,48 @@ jobs:
             sed -i "s/prompt\s*=\s*defaultPrompt/prompt=\`$PROMPT\`/" automator/qatomate.ts
             cat automator/qatomate.ts
       - run:
+          name: Install xvfb and ffmpeg for video recording
+          command: |
+            sudo apt-get install -y xvfb
+            sudo apt-get install -y ffmpeg
+      - run:
+          name: Setup Xvfb
+          command: |
+            # Kill any existing Xvfb process
+            pkill Xvfb
+
+            # Remove any existing lock file
+            rm -f /tmp/.X99-lock
+
+            # Start Xvfb
+            Xvfb :99 -screen 0 1920x1080x24 &
+
+            # Wait for Xvfb to start
+            sleep 2
+
+            # Set the DISPLAY environment variable
+            export DISPLAY=:99
+
+            # Print Xvfb process information
+            ps aux | grep Xvfb | grep -v grep
+      - run:
+          name: Test video recording
+          command: |
+            # Create artifacts directory
+            mkdir -p artifacts
+            
+            # Start recording with ffmpeg
+            ffmpeg -f x11grab -video_size 1920x1080 -i :99 -codec:v libx264 -r 30 -t 5 artifacts/test_video.mp4
+
+            # Check if the video file was created
+            ls -l artifacts/test_video.mp4
+
+            # Use ffprobe to check video information
+            ffprobe -v error -show_entries stream=codec_type,width,height -of default=noprint_wrappers=1 artifacts/test_video.mp4
+      - run:
+          name: Check FFmpeg version
+          command: ffmpeg -version
+      - run:
           name: Running QAtomator
           command: |
             GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
@@ -125,6 +167,10 @@ jobs:
       #          when: always
       #      - store_test_results:
       #          path: ~/
+      - run:
+          name: Zip all contents of artifacts folder
+          working_directory: ~/qatomator/artifacts
+          command: zip -r artifacts.zip .
       - store_artifacts:
           path: ~/qatomator/artifacts
 
