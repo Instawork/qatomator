@@ -53,13 +53,13 @@ const createRecorder = (recorderOptions: Partial<VideoRecorderOptions> = {}) => 
         logger.info(`Starting video recording with options: ${JSON.stringify(videoConfig)}`)
         logger.info(`ffmpeg input set to: ${videoConfig.input}, size: ${videoConfig.size}`)
         ffmpegCommand = ffmpeg()
-            .size('100%')
-            .noAudio()
-            .inputFormat(videoConfig.inputFormat)
             .input(videoConfig.input)
+            .inputFormat(videoConfig.inputFormat)
+            .size(videoConfig.size)
             .inputFPS(videoConfig.fps)
-            .output(videoConfig.outputPath)
+            .noAudio()
             .videoCodec(videoConfig.videoCodec)
+            .output(videoConfig.outputPath)
             
             // .size(videoConfig.size)
             // .outputOptions([

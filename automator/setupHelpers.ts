@@ -18,8 +18,8 @@ export const setupDriver = async () => {
         .addArguments('--no-sandbox')
         .addArguments('--disable-dev-shm-usage')
         .addArguments(`--load-extension=${config.extensionBuildDir}`)
-        .windowSize({ width: 800, height: 600 })
-        .addArguments('--window-size=800,600')
+        // .windowSize({ width: 800, height: 600 })
+        // .addArguments('--window-size=800,600')
         .addArguments('--silent-debugger-extension-api')
         // .addArguments('--start-fullscreen')
         .setUserPreferences({
