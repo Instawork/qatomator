@@ -20,13 +20,12 @@ const navigateAndQatomate = async (prompt: string) => {
         await initialiseExtensionAndEnterPrompt(driver, prompt)
         await trackExtensionLogs(driver)
 
-        fs.watch(config.downloadsDir, (eventType, filename) => {
+        fs.watch(config.downloadsDir, async (eventType, filename) => {
             if (filename === 'TERMINATE_ME.json') {
                 logger.info('Received TERMINATE_ME.json. Will stop the run after 5 seconds ...')
-                driver.quit()
-                recorder.stop().then(() => {
-                    process.exit(0)
-                })
+                await recorder.stop()
+                await driver.quit()
+                process.exit(0)
             }
         })
         setTimeout(async () => {
