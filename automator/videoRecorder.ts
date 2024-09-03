@@ -36,7 +36,7 @@ const getDefaultOptions = (): VideoRecorderOptions => {
             inputFormat: 'x11grab',
             fps: 30,
             videoCodec: 'libx264',
-            size: '1920x1080',
+            size: '2260x1440',
             input: `${display}`,
         }
     } else {
@@ -59,9 +59,9 @@ const createRecorder = (recorderOptions: Partial<VideoRecorderOptions> = {}) => 
             .videoCodec(videoConfig.videoCodec)
             .size(videoConfig.size)
             .outputOptions([
-                '-movflags +faststart',  // Optimize for web playback
-                '-preset ultrafast',     // Use ultrafast encoding preset for real-time encoding
-                '-crf 23',                // Constant Rate Factor for balance between quality and file size
+                '-movflags +faststart', // Optimize for web playback
+                '-preset ultrafast', // Use ultrafast encoding preset for real-time encoding
+                '-crf 23', // Constant Rate Factor for balance between quality and file size
             ])
 
         ffmpegCommand.on('start', (commandLine) => {

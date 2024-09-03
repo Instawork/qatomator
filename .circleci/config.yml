@@ -102,26 +102,30 @@ jobs:
           command: |
             sudo apt-get install -y xvfb
             sudo apt-get install -y ffmpeg
+            sudo apt-get install -y x11-utils
       - run:
           name: Setup Xvfb
           command: |
-            # Kill any existing Xvfb process
+            echo -e "\nKilling existing Xvfb process"
             pkill Xvfb
 
-            # Remove any existing lock file
+            echo -e "\nRemoving existing lock file"
             rm -f /tmp/.X99-lock
 
-            # Start Xvfb
-            Xvfb :99 -screen 0 1920x1080x24 &
+            echo -e "\nStarting Xvfb"
+            Xvfb :99 -screen 0 2260x1440x24 &
 
-            # Wait for Xvfb to start
+            echo -e "\nWaiting for Xvfb to start"
             sleep 2
 
-            # Set the DISPLAY environment variable
+            echo -e "\nSetting DISPLAY environment variable"
             export DISPLAY=:99
 
-            # Print Xvfb process information
+            echo -e "\nXvfb process information"
             ps aux | grep Xvfb | grep -v grep
+
+            echo -e "\nXvfb display information"
+            xdpyinfo | grep dimensions
       - run:
           name: Test video recording
           command: |
@@ -129,7 +133,7 @@ jobs:
             mkdir -p artifacts
             
             # Start recording with ffmpeg
-            ffmpeg -f x11grab -video_size 1920x1080 -i :99 -codec:v libx264 -r 30 -t 5 artifacts/test_video.mp4
+            ffmpeg -f x11grab -video_size 1440x900 -i :99 -codec:v libx264 -r 30 -t 5 artifacts/test_video.mp4
 
             # Check if the video file was created
             ls -l artifacts/test_video.mp4
