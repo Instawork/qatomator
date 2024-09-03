@@ -113,36 +113,23 @@ jobs:
             rm -f /tmp/.X99-lock
 
             echo -e "\nStarting Xvfb"
-            Xvfb :99 -screen 0 2260x1440x24 &
+            sudo Xvfb :99 -screen 0 1920x1080x24 &
 
             echo -e "\nWaiting for Xvfb to start"
             sleep 2
 
             echo -e "\nSetting DISPLAY environment variable"
-            export DISPLAY=:99
+            echo "export DISPLAY=:99" >> $BASH_ENV
+      - run:
+          name: Check Xvfb display information
+          command: |
+            echo "DISPLAY environment variable is set to: $DISPLAY"
 
             echo -e "\nXvfb process information"
             ps aux | grep Xvfb | grep -v grep
-
-            echo -e "\nXvfb display information"
-            xdpyinfo | grep dimensions
-      - run:
-          name: Test video recording
-          command: |
-            # Create artifacts directory
-            mkdir -p artifacts
             
-            # Start recording with ffmpeg
-            ffmpeg -f x11grab -video_size 1440x900 -i :99 -codec:v libx264 -r 30 -t 5 artifacts/test_video.mp4
-
-            # Check if the video file was created
-            ls -l artifacts/test_video.mp4
-
-            # Use ffprobe to check video information
-            ffprobe -v error -show_entries stream=codec_type,width,height -of default=noprint_wrappers=1 artifacts/test_video.mp4
-      - run:
-          name: Check FFmpeg version
-          command: ffmpeg -version
+            echo -e "\nXvfb display information"
+            xdpyinfo -display :99 | grep dimensions
       - run:
           name: Running QAtomator
           command: |

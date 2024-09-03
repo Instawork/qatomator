@@ -36,7 +36,7 @@ const getDefaultOptions = (): VideoRecorderOptions => {
             inputFormat: 'x11grab',
             fps: 30,
             videoCodec: 'libx264',
-            size: '2260x1440',
+            size: '1920x1080',
             input: `${display}`,
         }
     } else {
@@ -51,34 +51,25 @@ const createRecorder = (recorderOptions: Partial<VideoRecorderOptions> = {}) => 
 
     const start = () => {
         logger.info(`Starting video recording with options: ${JSON.stringify(videoConfig)}`)
+        logger.info(`ffmpeg input set to: ${videoConfig.input}, size: ${videoConfig.size}`)
         ffmpegCommand = ffmpeg()
-            .input(videoConfig.input)
+            .size('100%')
+            .noAudio()
             .inputFormat(videoConfig.inputFormat)
+            .input(videoConfig.input)
             .inputFPS(videoConfig.fps)
             .output(videoConfig.outputPath)
             .videoCodec(videoConfig.videoCodec)
-            .size(videoConfig.size)
-            .outputOptions([
-                '-movflags +faststart', // Optimize for web playback
-                '-preset ultrafast', // Use ultrafast encoding preset for real-time encoding
-                '-crf 23', // Constant Rate Factor for balance between quality and file size
-            ])
+            
+            // .size(videoConfig.size)
+            // .outputOptions([
+            //     '-movflags +faststart', // Optimize for web playback
+            //     '-preset ultrafast', // Use ultrafast encoding preset for real-time encoding
+            //     '-crf 23', // Constant Rate Factor for balance between quality and file size
+            // ])
 
         ffmpegCommand.on('start', (commandLine) => {
             logger.info(`Spawned ffmpeg with command: ${commandLine}`)
-        })
-
-        ffmpegCommand.on('stderr', (stderrLine) => {
-            logger.debug(`FFmpeg stderr: ${stderrLine}`)
-        })
-
-        ffmpegCommand.on('error', (err, stdout, stderr) => {
-            logger.error(`FFmpeg error: ${err.message}`)
-            logger.error(`FFmpeg stderr: ${stderr}`)
-        })
-
-        ffmpegCommand.on('end', () => {
-            logger.info('FFmpeg process ended')
         })
 
         ffmpegCommand.run()

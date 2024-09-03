@@ -6,14 +6,14 @@ import { loginPrompt } from './promptLibrary/prompts'
 import { createRecorder } from './videoRecorder'
 
 const prompt = loginPrompt
+const recorder = createRecorder({
+    outputPath: `${config.artifactsDir}/qatomator-screen-recording.mp4`,
+})
+recorder.start()
 
 const navigateAndQatomate = async (prompt: string) => {
     try {
-        const recorder = createRecorder({
-            outputPath: `${config.artifactsDir}/qatomator-screen-recording.mp4`,
-        })
         const driver = await setupDriver()
-        recorder.start()
         logger.info(`Navigating to ${config.targetEnvUrl}`)
         await driver.get(config.targetEnvUrl)
         // Todo: expand to different entrypoints
@@ -22,7 +22,7 @@ const navigateAndQatomate = async (prompt: string) => {
 
         fs.watch(config.downloadsDir, async (eventType, filename) => {
             if (filename === 'TERMINATE_ME.json') {
-                logger.info('Received TERMINATE_ME.json. Will stop the run after 5 seconds ...')
+                logger.info('Received TERMINATE_ME.json. Stopping run')
                 await recorder.stop()
                 await driver.quit()
                 process.exit(0)
@@ -30,10 +30,12 @@ const navigateAndQatomate = async (prompt: string) => {
         })
         setTimeout(async () => {
             logger.info('Timeout reached. Stopping run')
+            await recorder.stop()
             process.exit(0)
         }, config.maxTimeout)
     } catch (e) {
         logger.info('Error occurred', e)
+        await recorder.stop()
         process.exit(1)
     }
 }
