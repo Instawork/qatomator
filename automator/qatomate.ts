@@ -51,4 +51,8 @@ process.on('unhandledRejection', (reason, promise) => {
 })
 
 // Start the automation process.
-navigateAndQatomate(prompt)
+// wait 5 seconds and then start the automation
+setTimeout(() => {
+    logger.info('Starting QAtomator')
+    navigateAndQatomate(prompt)
+}, 5000)

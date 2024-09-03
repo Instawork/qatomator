@@ -103,11 +103,13 @@ jobs:
             sudo apt-get install -y xvfb
             sudo apt-get install -y ffmpeg
             sudo apt-get install -y x11-utils
+            sudo apt-get install -y x11-apps
       - run:
           name: Setup Xvfb
           command: |
             echo -e "\nKilling existing Xvfb process"
-            pkill Xvfb
+            sudo pkill Xvfb
+            ps aux | grep Xvfb | grep -v grep
 
             echo -e "\nRemoving existing lock file"
             rm -f /tmp/.X99-lock
@@ -119,20 +121,29 @@ jobs:
             sleep 2
 
             echo -e "\nSetting DISPLAY environment variable"
+            DISPLAY=:99 
+            nohup xclock > xclock.log 2>&1 &
             echo "export DISPLAY=:99" >> $BASH_ENV
+            sleep 2
+            ps aux
       - run:
-          name: Check Xvfb display information
+          name: Test Xvfb and ffmpeg setup
           command: |
-            echo "DISPLAY environment variable is set to: $DISPLAY"
+            mkdir artifacts
+            echo -e "DISPLAY environment variable is set to: \n$DISPLAY"
 
             echo -e "\nXvfb process information"
-            ps aux | grep Xvfb | grep -v grep
+            ps aux
             
             echo -e "\nXvfb display information"
             xdpyinfo -display :99 | grep dimensions
+
+            echo -e "\nTaking screenshot of Xvfb display"
+            ffmpeg -f x11grab -video_size 1920x1080 -i :99 -frames:v 1 artifacts/xvfb_test.png
       - run:
           name: Running QAtomator
           command: |
+            ps aux
             GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
             echo "GIT_COMMIT_DESC=$GIT_COMMIT_DESC"
             
@@ -144,7 +155,9 @@ jobs:
               yarn start
               sleep 10
               echo "QAtomating!"
+              ffmpeg -f x11grab -video_size 1920x1080 -i :99 -frames:v 1 artifacts/before_qatomate.png
               yarn ts-node automator/qatomate.ts
+              ffmpeg -f x11grab -video_size 1920x1080 -i :99 -frames:v 1 artifacts/after_qatomate.png
             else
               echo "'qatomate' command not found in commit message. Skipping."
               exit 0

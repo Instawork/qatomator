@@ -2,6 +2,7 @@ import ffmpeg from 'fluent-ffmpeg'
 import ffmpegInstaller from '@ffmpeg-installer/ffmpeg'
 import os from 'os'
 import { logger } from './logger'
+import robot from 'robotjs'
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path)
 
@@ -15,6 +16,16 @@ interface VideoRecorderOptions {
 }
 
 const getDefaultOptions = (): VideoRecorderOptions => {
+    // Get screen size
+    let size = ''
+    try {
+        const screenSize = robot.getScreenSize()
+        size = `${screenSize.width}x${screenSize.height}`
+        logger.info(`****** Detected screen size: ${size} ******`)
+    } catch (error) {
+        logger.warn(`Failed to detect screen size: ${error}. Will let ffmpeg determine size.`)
+    }
+
     const platform = os.platform()
     const isCI = process.env.CI === 'true'
     logger.info(`Platform: ${platform}, CI: ${isCI}`)
@@ -56,6 +67,7 @@ const createRecorder = (recorderOptions: Partial<VideoRecorderOptions> = {}) => 
             .input(videoConfig.input)
             .inputFormat(videoConfig.inputFormat)
             .size(videoConfig.size)
+            //.size('100%')
             .inputFPS(videoConfig.fps)
             .noAudio()
             .videoCodec(videoConfig.videoCodec)

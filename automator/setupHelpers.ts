@@ -45,6 +45,8 @@ export const setupDriver = async () => {
     await driver.manage().setTimeouts({ implicit: 10000 })
     // await driver.manage().window().maximize()
     await driver.manage().window().setRect({ width: 800, height: 600 })
+    await driver.manage().window().setRect({ x: 0, y: 0 })
+    // await driver.manage().window().fullscreen();
 
     logger.info('Driver setup complete')
     return driver
