@@ -2,21 +2,25 @@ import { initialiseExtensionAndEnterPrompt, setupDriver, trackExtensionLogs } fr
 import { config } from './config'
 import { logger } from './logger'
 import fs from 'fs'
-import { defaultPrompt } from './promptLibrary/prompts'
-
-const prompt = defaultPrompt
+import { loginPrompt } from './promptLibrary/prompts'
+import { WebDriver } from 'selenium-webdriver'
+const prompt = loginPrompt
+let driver: WebDriver
 
 const navigateAndQatomate = async (prompt: string) => {
     try {
-        const driver = await setupDriver()
+        driver = await setupDriver()
+        logger.info('Navigating to the target environment')
         await driver.get(config.targetEnvUrl) // Todo: expand to different entrypoints
+        logger.info('Initialising the extension and entering the prompt')
         await initialiseExtensionAndEnterPrompt(driver, prompt)
-        await trackExtensionLogs(driver)
+        // logger.info('Tracking the extension logs')
+        // await trackExtensionLogs(driver)
 
-        fs.watch(config.downloadsDir, (eventType, filename) => {
+        fs.watch(config.downloadsDir, async (eventType, filename) => {
             if (filename === 'TERMINATE_ME.json') {
                 logger.info('Received TERMINATE_ME.json. Stopping run')
-                driver.quit()
+                await driver.quit()
                 process.exit(0)
             }
         })
@@ -26,6 +30,9 @@ const navigateAndQatomate = async (prompt: string) => {
         }, config.maxTimeout)
     } catch (e) {
         logger.info('Error occurred', e)
+        if (driver) {
+            await driver.quit()
+        }
         process.exit(1)
     }
 }

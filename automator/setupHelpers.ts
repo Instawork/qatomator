@@ -17,12 +17,12 @@ export const setupDriver = async () => {
         .addArguments('--disable-gpu')
         .addArguments('--no-sandbox')
         .addArguments('--disable-dev-shm-usage')
-        .addArguments(`--load-extension=${config.extensionBuildDir}`)
-        .windowSize({ width: 1440, height: 900 })
+        .addArguments(`--load-extension=/opt/selenium/extensions`)
+        .addArguments('--start-maximized')
         .addArguments('--silent-debugger-extension-api')
         .setUserPreferences({
             'download.prompt_for_download': false,
-            'download.default_directory': config.downloadsDir,
+            'download.default_directory': '/home/seluser/Downloads',
             'download.directory_upgrade': true,
         })
 
@@ -33,11 +33,12 @@ export const setupDriver = async () => {
     const driver = await new Builder()
         .forBrowser('chrome')
         .setChromeOptions(<chrome.Options>options)
+        .usingServer('http://localhost:4444/wd/hub')
         .build()
 
     await (<ChromiumWebDriver>driver).sendDevToolsCommand('Page.setDownloadBehavior', {
         behavior: 'allow',
-        downloadPath: config.downloadsDir,
+        downloadPath: '/home/seluser/Downloads',
     })
 
     await driver.manage().setTimeouts({ implicit: 10000 })
