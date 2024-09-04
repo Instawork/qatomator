@@ -1,7 +1,3 @@
-# To execute this docker compose yml file use `docker compose -f docker-compose-v3-video.yml up`
-# Add the `-d` flag at the end for detached execution
-# To stop the execution, hit Ctrl+C, and then `docker compose -f docker-compose-v3-video.yml down`
-version: "3"
 services:
   chrome:
     image: selenium/node-chrome:4.20.0-20240505
@@ -23,7 +19,6 @@ services:
     image: selenium/video:ffmpeg-6.1.1-20240505
     volumes:
       - ./artifacts:/videos
-      - ./extension/build:/opt/selenium/extensions
     depends_on:
       - chrome
     environment:
@@ -39,3 +34,11 @@ services:
       - "4442:4442"
       - "4443:4443"
       - "4444:4444"
+
+  # test-runner:
+  #   image: cimg/node:20.14.0
+  #   working_dir: /usr/src/app
+  #   volumes:
+  #     - .:/usr/src/app
+  #   env_file:
+  #     - .env
