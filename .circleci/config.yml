@@ -72,6 +72,7 @@ jobs:
           name: Start all services declared in docker-compose.yml
           command: |
             echo -e "\n\nStarting all services declared in docker-compose.yml\n\n"
+            mkdir -p extension/build
             docker compose up -d
             
             echo -e "\n\nServices started\n\n"
@@ -126,6 +127,12 @@ jobs:
               sleep 10
               echo "QAtomating!"
               yarn ts-node automator/qatomate.ts
+
+              echo -e "\n\nVideos in container\n\n"
+              docker exec -it qatomator-chrome_video-1 ls -la videos/
+
+              echo -e "\n\nDownloaded files\n\n"
+              docker exec -it qatomator-chrome-1 ls -la /home/seluser/Downloads/
             else
               echo "'qatomate' command not found in commit message. Skipping."
               exit 0

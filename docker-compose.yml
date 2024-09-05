@@ -12,12 +12,13 @@ services:
       - SE_SCREEN_WIDTH=1920
       - SE_SCREEN_HEIGHT=1080
     volumes:
-      - .:/qatomator
+      - type: bind
+        source: ./extension/build
+        target: /opt/selenium/extensions
+        read_only: true
 
   chrome_video:
     image: selenium/video:ffmpeg-6.1.1-20240505
-    volumes:
-      - .:/videos
     depends_on:
       - chrome
     environment:
