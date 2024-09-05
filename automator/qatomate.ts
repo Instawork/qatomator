@@ -26,6 +26,7 @@ const navigateAndQatomate = async (prompt: string) => {
         })
         setTimeout(async () => {
             logger.info('Timeout reached. Stopping run')
+            await driver.quit()
             process.exit(0)
         }, config.maxTimeout)
     } catch (e) {

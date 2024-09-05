@@ -17,12 +17,12 @@ export const setupDriver = async () => {
         .addArguments('--disable-gpu')
         .addArguments('--no-sandbox')
         .addArguments('--disable-dev-shm-usage')
-        .addArguments(`--load-extension=/opt/selenium/extensions`)
+        .addArguments(`--load-extension=/qatomator/extension/build`)
         .addArguments('--start-maximized')
         .addArguments('--silent-debugger-extension-api')
         .setUserPreferences({
             'download.prompt_for_download': false,
-            'download.default_directory': '/home/seluser/Downloads',
+            'download.default_directory': '/qatomator/artifacts/downloads',
             'download.directory_upgrade': true,
         })
 
@@ -38,7 +38,7 @@ export const setupDriver = async () => {
 
     await (<ChromiumWebDriver>driver).sendDevToolsCommand('Page.setDownloadBehavior', {
         behavior: 'allow',
-        downloadPath: '/home/seluser/Downloads',
+        downloadPath: '/qatomator/artifacts/downloads',
     })
 
     await driver.manage().setTimeouts({ implicit: 10000 })

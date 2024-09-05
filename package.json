@@ -6,7 +6,7 @@
   "author": "Chuky",
   "scripts": {
     "build": "node extension/utils/build.js",
-    "start": "mkdir -p artifacts && nohup node extension/utils/webserver.js > artifacts/qatomator.log 2>&1 &",
+    "start": "mkdir -p artifacts && node extension/utils/webserver.js > artifacts/qatomator.log 2>&1 &",
     "stop": "pkill -f extension/utils/webserver.js",
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}'",
     "lint": "yarn eslint .",

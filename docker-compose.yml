@@ -12,13 +12,12 @@ services:
       - SE_SCREEN_WIDTH=1920
       - SE_SCREEN_HEIGHT=1080
     volumes:
-      - ./artifacts/downloads:/home/seluser/Downloads
-      - ./extension/build:/opt/selenium/extensions
+      - .:/qatomator
 
   chrome_video:
     image: selenium/video:ffmpeg-6.1.1-20240505
     volumes:
-      - ./artifacts:/videos
+      - .:/videos
     depends_on:
       - chrome
     environment:
