@@ -125,22 +125,6 @@ jobs:
               yarn start
               sleep 10
               echo "QAtomating!"
-
-              echo -e "\n\nCurrent containers\n\n"
-              docker ps
-
-              echo -e "\n\nls -la /home/seluser/Downloads within the container\n\n"
-              docker exec qatomator-chrome-1 ls -la /home/seluser/Downloads
-              
-              echo -e "\n\nmount | grep Downloads within the container\n\n"
-              docker exec qatomator-chrome-1 mount | grep Downloads
-
-              echo -e "\n\nls -la /opt/selenium/extensions within the container\n\n"
-              docker exec qatomator-chrome-1 ls -la /opt/selenium/extensions
-
-              echo -e "\n\nmount | grep extension within the container\n\n"
-              docker exec qatomator-chrome-1 mount | grep extension
-
               yarn ts-node automator/qatomate.ts
             else
               echo "'qatomate' command not found in commit message. Skipping."
