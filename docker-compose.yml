@@ -35,10 +35,3 @@ services:
       - "4443:4443"
       - "4444:4444"
 
-  # test-runner:
-  #   image: cimg/node:20.14.0
-  #   working_dir: /usr/src/app
-  #   volumes:
-  #     - .:/usr/src/app
-  #   env_file:
-  #     - .env

@@ -127,16 +127,23 @@ jobs:
               sleep 10
               echo "QAtomating!"
               yarn ts-node automator/qatomate.ts
+              sleep 10
 
               echo -e "\n\nVideos in container\n\n"
               docker exec -it qatomator-chrome_video-1 ls -la videos/
+              docker cp qatomator-chrome_video-1:/videos/. ./artifacts/
 
               echo -e "\n\nDownloaded files\n\n"
               docker exec -it qatomator-chrome-1 ls -la /home/seluser/Downloads/
+              docker cp qatomator-chrome-1:/home/seluser/Downloads/. ./artifacts/downloads/
             else
               echo "'qatomate' command not found in commit message. Skipping."
               exit 0
             fi
+      - run:
+          name: Zip all contents of artifacts folder
+          working_directory: ~/qatomator/artifacts
+          command: zip -r artifacts.zip .
       - store_artifacts:
           path: ~/qatomator/artifacts
 
