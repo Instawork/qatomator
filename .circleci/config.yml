@@ -49,7 +49,10 @@ jobs:
   QAtomate:
     # executor: node-browser
     machine:
-      image: ubuntu-2204:edge
+      # image: ubuntu-2204:edge
+      image: default
+      # image: ubuntu-2004:202104-01
+      # docker_layer_caching: true
     resource_class: medium
     working_directory: ~/qatomator
     parameters:
@@ -69,8 +72,8 @@ jobs:
           name: Start all services declared in docker-compose.yml
           command: |
             echo -e "\n\nStarting all services declared in docker-compose.yml\n\n"
-            touch .env
-            docker compose up -d chrome chrome_video selenium-hub
+            docker compose up -d
+            
             echo -e "\n\nServices started\n\n"
             docker ps
       - restore_cache:
@@ -122,13 +125,23 @@ jobs:
               yarn start
               sleep 10
               echo "QAtomating!"
-              env >> .env
-              
-              echo -e "\n\nRunning docker with sudo \n\n"
-              sudo docker compose run test-runner ls -la
 
-              echo -e "\n\nRunning docker without sudo\n\n"
-              docker compose run test-runner ls -la
+              echo -e "\n\nCurrent containers\n\n"
+              docker ps
+
+              echo -e "\n\nls -la /home/seluser/Downloads within the container\n\n"
+              docker exec qatomator-chrome-1 ls -la /home/seluser/Downloads
+              
+              echo -e "\n\nmount | grep Downloads within the container\n\n"
+              docker exec qatomator-chrome-1 mount | grep Downloads
+
+              echo -e "\n\nls -la /opt/selenium/extensions within the container\n\n"
+              docker exec qatomator-chrome-1 ls -la /opt/selenium/extensions
+
+              echo -e "\n\nmount | grep extension within the container\n\n"
+              docker exec qatomator-chrome-1 mount | grep extension
+
+              yarn ts-node automator/qatomate.ts
             else
               echo "'qatomate' command not found in commit message. Skipping."
               exit 0
