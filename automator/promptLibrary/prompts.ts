@@ -27,3 +27,53 @@ Workflow Walkthrough:
 
 Execution Note:
 - Stop execution after thoroughly exploring the "Attire & Grooming Instructions" section once.`
+
+//shift list exploratory prompts are not very stable and can be improved
+export const shiftListExploratoryPrompt1 = `### Task Overview:
+
+As a QA Engineer, your goal is to test the Shift Lists screen on the Instawork platform. Your focus should be on interacting with various features, particularly CTAs (Call-To-Actions) and touchpoints, while avoiding any booking-related features.
+
+### General Exploration Rules:
+
+1. **Focus Area**: Thoroughly explore and interact with elements on the Shift Lists screen, such as CTAs, tags, codes, and pagination.
+2. **Avoid Bookings**: Do not interact with any booking-related features.
+3. **Navigation**: If an action takes you away from the Shift Lists screen, return immediately to continue your testing.
+4. **Modal Interaction**: If you open a modal by clicking on a link, verify the modal content, close it, and return to the Shift Lists screen.
+5. **Scope**: Do not navigate into the shift details screen.
+6. **Screen Coverage**: Explore both the Upcoming and Past shift lists.
+
+### Workflow Walkthrough:
+
+1. **Initial Check**: Verify that the Shift Lists screen displays all necessary features and information, including:
+    - Sidebar components and links
+    - Shift type tags, date, time, and position
+    - Clock-in and Clock-out codes
+    - Number of pros
+    - Filters for location and date
+    - Pagination controls
+2. **Interaction**: Click on various CTAs, and links, and ensure modals open correctly. After verifying, close the modal and continue exploring.
+3. **View Schedules**: At the end of the exploration, click the "View Schedules" CTA. Stop the execution once you land on the Gig Template screen.
+
+### Execution Note:
+
+- **Order of Actions**: Perform all other interactions first, then try the "View Schedules" CTA last.
+- **Consistency Check**: Ensure that each step is executed in sequence and the screen is thoroughly checked before moving to the next action.`
+
+export const shiftListExploratoryPrompt2 = `As a Qa engineer your job is to Test the "Shift Lists" screen, focusing on CTAs and touchpoints. Avoid booking features and the shift details screen and the gig templates screen.
+
+Exploration Rules:
+- Stay on the Shift Lists screen: Do not enter the shift details or gig templates screens.
+- Open and close modals when clicking links, then return to exploring the Shift Lists.
+- Check both Upcoming and Past shift lists without leaving the main screen.
+
+Navigation: 
+- If you land on the "Edit Upcoming Shifts" screen, click on "Shifts" in the top navigation bar to return to the Shift Lists screen and continue testing.
+
+Workflow:
+- Verify key elements: sidebar, shift tags, dates, times, positions, codes, pros count, filters, and pagination.
+- Interact with CTAs and links, ensuring modals function correctly.
+- Do not click "View Schedules" to avoid navigating to the gig templates screen.
+- DO NOT repeat actions. perform one action only once 
+
+Execution Note: 
+Stop the execution when you explored the shift list screen throughly.`
