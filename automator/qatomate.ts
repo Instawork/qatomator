@@ -2,20 +2,19 @@ import { initialiseExtensionAndEnterPrompt, setupDriver, trackExtensionLogs } fr
 import { config } from './config'
 import { logger } from './logger'
 import fs from 'fs'
-import { loginPrompt } from './promptLibrary/prompts'
+import { miniPrompt } from './promptLibrary/prompts'
 import { WebDriver } from 'selenium-webdriver'
-const prompt = loginPrompt
+const prompt = miniPrompt
 let driver: WebDriver
 
 const navigateAndQatomate = async (prompt: string) => {
     try {
         driver = await setupDriver()
-        logger.info('Navigating to the target environment')
         await driver.get(config.targetEnvUrl) // Todo: expand to different entrypoints
-        logger.info('Initialising the extension and entering the prompt')
         await initialiseExtensionAndEnterPrompt(driver, prompt)
-        // logger.info('Tracking the extension logs')
-        // await trackExtensionLogs(driver)
+        if (!config.isCI) {
+            await trackExtensionLogs(driver)
+        }
 
         fs.watch(config.downloadsDir, async (eventType, filename) => {
             if (filename === 'TERMINATE_ME.json') {

@@ -1,10 +1,4 @@
 version: 2.1
-# executors:
-#   node-browser:
-#     docker:
-#       - image: cimg/node:20.9.0
-# orbs:
-#   browser-tools: circleci/browser-tools@1.4.7
 
 parameters:
   backend-url:
@@ -47,27 +41,17 @@ parameters:
 
 jobs:
   QAtomate:
-    # executor: node-browser
     machine:
-      # image: ubuntu-2204:edge
       image: default
-      # image: ubuntu-2004:202104-01
-      # docker_layer_caching: true
     resource_class: medium
     working_directory: ~/qatomator
     parameters:
     steps:
-      # - browser-tools/install-chrome
-      # - browser-tools/install-chromedriver
       - run:
-          name: Check version of installed node, browser, drivers
+          name: Check version of installed node
           command: |
-            # google-chrome --version
-            # export PATH="/usr/local/bin/chromedriver:$PATH"
-            # chromedriver --version
             node -v
       - checkout
-      # - setup_remote_docker
       - run:
           name: Start all services declared in docker-compose.yml
           command: |
@@ -139,6 +123,15 @@ jobs:
               echo "'qatomate' command not found in commit message. Skipping."
               exit 0
             fi
+      #      - run:
+      #          name: Ping results on Slack
+      #          command: |
+      #              if (<< parameters.send-slack-notification >>); then
+      #                 node ~/repo/nightwatch/scripts/testSummaryToSlack.js ~/repo/nightwatch/reports $CIRCLE_BUILD_URL $QA_TOOLS_WEBHOOK_URL
+      #              fi
+      #          when: always
+      #      - store_test_results:
+      #          path: ~/
       - run:
           name: Zip all contents of artifacts folder
           working_directory: ~/qatomator/artifacts
@@ -148,5 +141,19 @@ jobs:
 
 workflows:
   QAtomate:
+    # to trigger if prompt and entryPoint is provided above or other alternatives
+    #    when:
+    #      or:
+    #        - and:
+    #            - equal: [ master, << pipeline.git.branch >> ]
+    #            - equal: [ api, << pipeline.trigger_source >> ]
+    #        # Custom backend-url, mainly for demoservers
+    #        - not:
+    #            equal: [ https://qa.instawork.com, << pipeline.parameters.backend-url >> ]
     jobs:
       - QAtomate
+#          send-slack-notification: false
+#          context:
+#            - Slack
+#            - QA
+

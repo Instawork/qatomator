@@ -17,12 +17,18 @@ export const setupDriver = async () => {
         .addArguments('--disable-gpu')
         .addArguments('--no-sandbox')
         .addArguments('--disable-dev-shm-usage')
-        .addArguments(`--load-extension=/opt/selenium/extensions`)
+        .addArguments(
+            config.isCI
+                ? `--load-extension=/opt/selenium/extensions`
+                : `--load-extension=${config.extensionBuildDir}`,
+        )
         .addArguments('--start-maximized')
         .addArguments('--silent-debugger-extension-api')
         .setUserPreferences({
             'download.prompt_for_download': false,
-            'download.default_directory': '/home/seluser/Downloads',
+            'download.default_directory': config.isCI
+                ? '/home/seluser/Downloads'
+                : config.downloadsDir,
             'download.directory_upgrade': true,
         })
 
@@ -30,15 +36,17 @@ export const setupDriver = async () => {
     prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL)
     options.setLoggingPrefs(prefs)
 
-    const driver = await new Builder()
-        .forBrowser('chrome')
-        .setChromeOptions(<chrome.Options>options)
-        .usingServer('http://localhost:4444/wd/hub')
-        .build()
+    let builder = await new Builder().forBrowser('chrome').setChromeOptions(<chrome.Options>options)
+
+    if (config.isCI) {
+        builder = builder.usingServer('http://localhost:4444/wd/hub')
+    }
+
+    const driver = await builder.build()
 
     await (<ChromiumWebDriver>driver).sendDevToolsCommand('Page.setDownloadBehavior', {
         behavior: 'allow',
-        downloadPath: '/home/seluser/Downloads',
+        downloadPath: config.isCI ? '/home/seluser/Downloads' : config.downloadsDir,
     })
 
     await driver.manage().setTimeouts({ implicit: 10000 })
@@ -108,12 +116,20 @@ export const initialiseExtensionAndEnterPrompt = async (driver: WebDriver, promp
  * @returns {Promise<void>} A promise that resolves when the CDP connection is established and log tracking is set up.
  */
 export const trackExtensionLogs = async (driver: WebDriver) => {
+    logger.debug('Starting trackExtensionLogs function')
     const cdpConnection = await driver.createCDPConnection('page')
+    logger.debug('CDP connection created', { cdpConnection })
     const client = await CDP({ target: cdpConnection._wsConnection._url })
+    logger.debug('CDP client created', { client })
     // const setupListeners = async () => {
     client.on('Runtime.consoleAPICalled', async (event) => {
+        logger.debug('Runtime.consoleAPICalled event received', { event })
         const args = event.args
         if (args.length && args[0].value) {
+            logger.debug(
+                `Event type: ${event.type}, Event value: ${JSON.stringify(args[0].value)}`,
+                { args },
+            )
             if (['log', 'debug', 'info'].includes(event.type)) {
                 logger.info(JSON.stringify(args[0].value))
             } else if (['warning'].includes(event.type)) {
@@ -128,6 +144,7 @@ export const trackExtensionLogs = async (driver: WebDriver) => {
     // }
     // await setupListeners()
     await client.Runtime.enable()
+    logger.debug('Runtime enabled')
     // await client.Page.enable()
     // client.on('Page.frameNavigated', async (event) => {
     //     logger.info(`Page has navigated to: ${event.frame.url}`)

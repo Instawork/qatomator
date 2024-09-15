@@ -4,7 +4,8 @@ When navigating the booking form, take note of the following which you may or ma
 - Click "Done" after you have selected your dates in the date picker
 Consider your task finished on completing the booking.`
 
-export const loginPrompt = `You are a business partner on the Instawork platform. Click the login button.
+// Minimal prompt used for testing purposes
+export const miniPrompt = `You are a business partner on the Instawork platform. Click the login button.
 Consider your task finished after you have successfully navigated to the login page.`
 
 export const shortTermBookingFormTestPrompt = `
