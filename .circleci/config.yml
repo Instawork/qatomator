@@ -73,6 +73,7 @@ jobs:
           command: |
             echo -e "\n\nStarting all services declared in docker-compose.yml\n\n"
             mkdir -p extension/build
+            mkdir -p artifacts/downloads
             docker compose up -d
             
             echo -e "\n\nServices started\n\n"
@@ -124,18 +125,22 @@ jobs:
             then
               echo "Initialising extension"
               yarn start
-              sleep 10
+              sleep 15
+
+              echo -e "\n\nGetting UID and GID for seluser\n\n"
+              SELUSER_UID=$(docker-compose exec -T chrome id -u seluser)
+              SELUSER_GID=$(docker-compose exec -T chrome id -g seluser)
+              echo "Detected UID:GID for seluser: $SELUSER_UID:$SELUSER_GID"
+              
+              echo -e "\n\nChanging ownership of artifacts and extension folders to allow writing from container\n\n"
+              sudo chown -R $SELUSER_UID:$SELUSER_GID artifacts extension
+              sudo chmod -R 777 artifacts extension
+
               echo "QAtomating!"
               yarn ts-node automator/qatomate.ts
+              
+              echo -e "\n\nSleeping for 10 seconds to let videos be generated\n\n"
               sleep 10
-
-              echo -e "\n\nVideos in container\n\n"
-              docker exec -it qatomator-chrome_video-1 ls -la videos/
-              docker cp qatomator-chrome_video-1:/videos/. ./artifacts/
-
-              echo -e "\n\nDownloaded files\n\n"
-              docker exec -it qatomator-chrome-1 ls -la /home/seluser/Downloads/
-              docker cp qatomator-chrome-1:/home/seluser/Downloads/. ./artifacts/downloads/
             else
               echo "'qatomate' command not found in commit message. Skipping."
               exit 0
