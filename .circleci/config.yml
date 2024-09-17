@@ -143,7 +143,7 @@ jobs:
       - run:
           name: Zip all contents of artifacts folder
           working_directory: ~/qatomator/artifacts
-          command: zip -r artifacts.zip .
+          command: zip -r artifacts.zip . || true
       - store_artifacts:
           path: ~/qatomator/artifacts
 
