@@ -2,9 +2,9 @@ import { initialiseExtensionAndEnterPrompt, setupDriver, trackExtensionLogs } fr
 import { config } from './config'
 import { logger } from './logger'
 import fs from 'fs'
-import { miniPrompt } from './promptLibrary/prompts'
+import { defaultPrompt } from './promptLibrary/prompts'
 import { WebDriver } from 'selenium-webdriver'
-const prompt = miniPrompt
+const prompt = defaultPrompt
 let driver: WebDriver
 
 const navigateAndQatomate = async (prompt: string) => {
