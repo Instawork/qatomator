@@ -53,15 +53,19 @@ jobs:
             node -v
       - checkout
       - run:
-          name: Start all services declared in docker-compose.yml
+          name: Start all docker services
           command: |
-            echo -e "\n\nStarting all services declared in docker-compose.yml\n\n"
-            mkdir -p extension/build
-            mkdir -p artifacts/downloads
-            docker compose up -d
-            
-            echo -e "\n\nServices started\n\n"
-            docker ps
+            if [[ "$GIT_COMMIT_DESC" =~ "qatomate" ]] || [ << pipeline.parameters.qatomate >> == "true" ]; then
+              echo -e "\n\nStarting all services declared in docker-compose.yml\n\n"
+              mkdir -p extension/build
+              mkdir -p artifacts/downloads
+              docker compose up -d
+              
+              echo -e "\n\nServices started\n\n"
+              docker ps
+            else
+              echo "Conditions not met, skipping"
+            fi
       - restore_cache:
           keys:
             - node-modules-{{ checksum "yarn.lock" }}
@@ -75,28 +79,32 @@ jobs:
       - run:
           name: Combine Prompt Parts and Replace Variable
           command: |
-            PROMPT=""
-            echo "<< pipeline.parameters.prompt-part-1 >>"
-            echo "<< pipeline.parameters.prompt-part-2 >>"
-            echo "<< pipeline.parameters.prompt-part-3 >>"
-            echo "STARTING"
-            echo $PROMPT
-            if [ ! -z "<< pipeline.parameters.prompt-part-1 >>" ]; then
-              PROMPT="<< pipeline.parameters.prompt-part-1 >>\n"
+            if [[ -n "<< pipeline.parameters.prompt-part-1 >>" ]]; then
+              PROMPT=""
+              echo "<< pipeline.parameters.prompt-part-1 >>"
+              echo "<< pipeline.parameters.prompt-part-2 >>"
+              echo "<< pipeline.parameters.prompt-part-3 >>"
+              echo "STARTING"
+              echo $PROMPT
+              if [ ! -z "<< pipeline.parameters.prompt-part-1 >>" ]; then
+                PROMPT="<< pipeline.parameters.prompt-part-1 >>\n"
+              fi
+              echo $PROMPT
+              if [ ! -z "<< pipeline.parameters.prompt-part-2 >>" ]; then
+                addon="<< pipeline.parameters.prompt-part-2 >>\n"
+                PROMPT="$PROMPT$addon"
+              fi
+              echo $PROMPT
+              if [ ! -z "<< pipeline.parameters.prompt-part-3 >>" ]; then
+                addon="<< pipeline.parameters.prompt-part-3 >>\n"
+                PROMPT="$PROMPT$addon"
+              fi
+              echo "Combined Prompt: $PROMPT"
+              sed -i "s/prompt\s*=\s*defaultPrompt/prompt=\`$PROMPT\`/" automator/qatomate.ts
+              cat automator/qatomate.ts
+            else
+              echo "Conditions not met, skipping"
             fi
-            echo $PROMPT
-            if [ ! -z "<< pipeline.parameters.prompt-part-2 >>" ]; then
-              addon="<< pipeline.parameters.prompt-part-2 >>\n"
-              PROMPT="$PROMPT$addon"
-            fi
-            echo $PROMPT
-            if [ ! -z "<< pipeline.parameters.prompt-part-3 >>" ]; then
-              addon="<< pipeline.parameters.prompt-part-3 >>\n"
-              PROMPT="$PROMPT$addon"
-            fi
-            echo "Combined Prompt: $PROMPT"
-            sed -i "s/prompt\s*=\s*defaultPrompt/prompt=\`$PROMPT\`/" automator/qatomate.ts
-            cat automator/qatomate.ts
       - run:
           name: Running QAtomator
           command: |
