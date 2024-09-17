@@ -10,6 +10,7 @@ interface Config {
     extensionBuildDir: string
     artifactsDir: string
     downloadsDir: string
+    isCI: boolean
 }
 
 /**
@@ -22,6 +23,7 @@ interface Config {
  * @property {string} extensionBuildDir - The directory path for the extension build, resolved relative to the project root.
  * @property {string} artifactsDir - The directory path for artifacts, resolved relative to the project root.
  * @property {string} downloadsDir - The directory path for downloads, resolved relative to the artifacts directory.
+ * @property {boolean} isCI - A boolean value indicating whether the application is running in a CI environment.
  */
 export const config: Config = {
     openAiKey: process.env.OPENAI_API_KEY || '',
@@ -30,6 +32,7 @@ export const config: Config = {
     extensionBuildDir: path.resolve(findRoot(__dirname), 'extension/build'),
     artifactsDir: path.resolve(findRoot(__dirname), 'artifacts'),
     downloadsDir: path.resolve(findRoot(__dirname), 'artifacts/downloads'),
+    isCI: Boolean(process.env.CIRCLECI),
 }
 
 if (!config.openAiKey) {

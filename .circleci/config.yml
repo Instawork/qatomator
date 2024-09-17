@@ -1,10 +1,4 @@
 version: 2.1
-executors:
-  node-browser:
-    docker:
-      - image: cimg/node:20.14.0-browsers
-orbs:
-  browser-tools: circleci/browser-tools@1.4.7
 
 parameters:
   backend-url:
@@ -47,21 +41,31 @@ parameters:
 
 jobs:
   QAtomate:
-    executor: node-browser
+    machine:
+      image: default
     resource_class: medium
     working_directory: ~/qatomator
     parameters:
     steps:
-      - browser-tools/install-chrome
-      - browser-tools/install-chromedriver
       - run:
-          name: Check version of installed node, browser, drivers
+          name: Check version of installed node
           command: |
-            google-chrome --version
-            export PATH="/usr/local/bin/chromedriver:$PATH"
-            chromedriver --version
             node -v
       - checkout
+      - run:
+          name: Start all docker services
+          command: |
+            if [[ "$GIT_COMMIT_DESC" =~ "qatomate" ]] || [ << pipeline.parameters.qatomate >> == "true" ]; then
+              echo -e "\n\nStarting all services declared in docker-compose.yml\n\n"
+              mkdir -p extension/build
+              mkdir -p artifacts/downloads
+              docker compose up -d
+              
+              echo -e "\n\nServices started\n\n"
+              docker ps
+            else
+              echo "Conditions not met, skipping"
+            fi
       - restore_cache:
           keys:
             - node-modules-{{ checksum "yarn.lock" }}
@@ -75,28 +79,32 @@ jobs:
       - run:
           name: Combine Prompt Parts and Replace Variable
           command: |
-            PROMPT=""
-            echo "<< pipeline.parameters.prompt-part-1 >>"
-            echo "<< pipeline.parameters.prompt-part-2 >>"
-            echo "<< pipeline.parameters.prompt-part-3 >>"
-            echo "STARTING"
-            echo $PROMPT
-            if [ ! -z "<< pipeline.parameters.prompt-part-1 >>" ]; then
-              PROMPT="<< pipeline.parameters.prompt-part-1 >>\n"
+            if [[ -n "<< pipeline.parameters.prompt-part-1 >>" ]]; then
+              PROMPT=""
+              echo "<< pipeline.parameters.prompt-part-1 >>"
+              echo "<< pipeline.parameters.prompt-part-2 >>"
+              echo "<< pipeline.parameters.prompt-part-3 >>"
+              echo "STARTING"
+              echo $PROMPT
+              if [ ! -z "<< pipeline.parameters.prompt-part-1 >>" ]; then
+                PROMPT="<< pipeline.parameters.prompt-part-1 >>\n"
+              fi
+              echo $PROMPT
+              if [ ! -z "<< pipeline.parameters.prompt-part-2 >>" ]; then
+                addon="<< pipeline.parameters.prompt-part-2 >>\n"
+                PROMPT="$PROMPT$addon"
+              fi
+              echo $PROMPT
+              if [ ! -z "<< pipeline.parameters.prompt-part-3 >>" ]; then
+                addon="<< pipeline.parameters.prompt-part-3 >>\n"
+                PROMPT="$PROMPT$addon"
+              fi
+              echo "Combined Prompt: $PROMPT"
+              sed -i "s/prompt\s*=\s*defaultPrompt/prompt=\`$PROMPT\`/" automator/qatomate.ts
+              cat automator/qatomate.ts
+            else
+              echo "Conditions not met, skipping"
             fi
-            echo $PROMPT
-            if [ ! -z "<< pipeline.parameters.prompt-part-2 >>" ]; then
-              addon="<< pipeline.parameters.prompt-part-2 >>\n"
-              PROMPT="$PROMPT$addon"
-            fi
-            echo $PROMPT
-            if [ ! -z "<< pipeline.parameters.prompt-part-3 >>" ]; then
-              addon="<< pipeline.parameters.prompt-part-3 >>\n"
-              PROMPT="$PROMPT$addon"
-            fi
-            echo "Combined Prompt: $PROMPT"
-            sed -i "s/prompt\s*=\s*defaultPrompt/prompt=\`$PROMPT\`/" automator/qatomate.ts
-            cat automator/qatomate.ts
       - run:
           name: Running QAtomator
           command: |
@@ -109,9 +117,16 @@ jobs:
             then
               echo "Initialising extension"
               yarn start
-              sleep 10
+              sleep 15
+              
+              echo -e "\n\nSetting permissions for artifacts folder to allow writing from docker containers\n\n"
+              sudo chmod -R 777 artifacts extension
+
               echo "QAtomating!"
               yarn ts-node automator/qatomate.ts
+              
+              echo -e "\n\nSleeping for 10 seconds to let videos be generated\n\n"
+              sleep 10
             else
               echo "'qatomate' command not found in commit message. Skipping."
               exit 0
@@ -125,6 +140,10 @@ jobs:
       #          when: always
       #      - store_test_results:
       #          path: ~/
+      - run:
+          name: Zip all contents of artifacts folder
+          working_directory: ~/qatomator/artifacts
+          command: zip -r artifacts.zip . || true
       - store_artifacts:
           path: ~/qatomator/artifacts
 
@@ -145,5 +164,4 @@ workflows:
 #          context:
 #            - Slack
 #            - QA
-
 
