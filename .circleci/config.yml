@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   backend-url:
     type: string
-    default: "https://qa.instawork.com"
+    default: "https://app.staging2.instawork.com"
     description: "Endpoint to run your test against, default is qa"
   send-slack-notification:
     type: boolean
@@ -108,6 +108,8 @@ jobs:
       - run:
           name: Running QAtomator
           command: |
+            export BACKEND_URL="<< pipeline.parameters.backend-url >>"
+          
             GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)
             echo "GIT_COMMIT_DESC=$GIT_COMMIT_DESC"
             
