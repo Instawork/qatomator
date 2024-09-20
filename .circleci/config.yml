@@ -108,7 +108,6 @@ jobs:
       - run:
           name: Running QAtomator
           command: |
-#           Quick hack
             export BACKEND_URL="<< pipeline.parameters.backend-url >>"
           
             GIT_COMMIT_DESC=$(git log --format=%B -n 1 $CIRCLE_SHA1)

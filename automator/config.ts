@@ -35,6 +35,8 @@ export const config: Config = {
     isCI: Boolean(process.env.CIRCLECI),
 }
 
+console.log(config.targetEnvUrl)
+
 if (!config.openAiKey) {
     logger.error('OPENAI_API_KEY environment variable is not set.')
     throw new Error('OPENAI_API_KEY environment variable is required.')
