@@ -1,5 +1,7 @@
 <img src="extension/src/assets/img/kool-cat.png" width="64"/>
 
+https://github.com/user-attachments/assets/f511f1a6-0553-43fb-a78c-66f00c39f6d8
+
 ### Quickstart
 1. `nvm use`
 2. `yarn` to install the dependencies
